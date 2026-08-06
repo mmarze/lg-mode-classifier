@@ -55,9 +55,9 @@ def C_lp(p: int, l: int) -> float:
     return clp
 
 
-def L_lp(p: int, l: int, r, w_z) -> float:
+def L_lp(p: int, l: int, r: np.ndarray, w_z: int | float) -> float:
     """
-    Calculate the required normalization constant for the generalized Laguerre polynomial.
+    Calculate the generalized Laguerre polynomial.
 
     Parameters
     ----------
@@ -65,7 +65,7 @@ def L_lp(p: int, l: int, r, w_z) -> float:
         The radial index.  Must be non-negative.
     l : int
         The azimuthal index. Must be integer.
-    r : int or float
+    r : np.ndarray
         The radial coordinate (in meters).
     w_z: int or float
         The beam width w(z) at the position z from the beam waist.
@@ -73,12 +73,14 @@ def L_lp(p: int, l: int, r, w_z) -> float:
     Returns
     -------
     L_lp : float
-        The normalization constant for the generalized Laguerre polynomial.
+        The generalized Laguerre polynomial.
 
     Raises
     ------
     TypeError
         If l or p is not a real number or is not an integer.
+        If r is not an np.ndarray.
+        If w_z is not a real number or is not an integeror is not a float.
     ValueError
         If p < 0.
         If r < 0.
@@ -96,7 +98,7 @@ def L_lp(p: int, l: int, r, w_z) -> float:
                 f"l must be an integer, got {type(l).__name__}."
             )
 
-    if not isinstance(r, (int, float, np.integer, np.floating)):
+    if not isinstance(r, np.ndarray):
         raise TypeError(
             f"r must be a real number, got {type(r).__name__}."
         )
@@ -113,7 +115,7 @@ def L_lp(p: int, l: int, r, w_z) -> float:
     if not np.isfinite(l):
         raise ValueError("l must be finite.")
 
-    if not np.isfinite(r):
+    if not np.all(np.isfinite(r)):
         raise ValueError("r must be finite.")
 
     if not np.isfinite(w_z):
@@ -122,7 +124,7 @@ def L_lp(p: int, l: int, r, w_z) -> float:
     if p < 0:
         raise ValueError("p must be non-negative.")
 
-    if r < 0:
+    if np.any(r < 0):
         raise ValueError("r must be non-negative.")
 
     if w_z <= 0:

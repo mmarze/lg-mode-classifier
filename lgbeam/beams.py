@@ -91,20 +91,15 @@ def LG(p: int, l: int, r: np.ndarray, phi: np.ndarray, z: int | float, w0: int |
 
     rho = np.sqrt(2.0) * r / wz
 
-    U = C / wz
-
-    U *= rho**abs(l)
-
-    U *= L_lp(p, l, r, wz)
-
-    U *= np.exp(-r**2/wz**2)
-
-    U *= np.exp(-1j*kz*r**2/(2*Rz))
-
-    U *= np.exp(-1j*l*phi)
-
-    U *= np.exp(1j*psi(l, p, z, zr))
-
-    U *= np.exp(-1j*kz*z)
+    U = (
+        C / wz
+        * rho**abs(l)
+        * L_lp(p, l, r, wz)
+        * np.exp(-r**2 / wz**2)
+        * np.exp(-1j * kz * r**2 / (2 * Rz))
+        * np.exp(-1j * l * phi)
+        * np.exp(1j * psi(l, p, z, zr))
+        * np.exp(-1j * kz * z)
+    )
 
     return U
