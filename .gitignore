@@ -1,5 +1,6 @@
 notes.rtf
 .vscode
+lgbeam.egg-info/
 
 # Virtual environment
 .venv/
