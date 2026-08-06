@@ -11,3 +11,10 @@ __pycache__/
 
 # Environment variables
 .env
+
+# Sphinx build
+docs/build/
+
+# Sphinx doctrees
+docs/source/.doctrees/
+docs/source/.DS_Store
