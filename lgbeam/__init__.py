@@ -14,3 +14,10 @@ from .laguerre import (
 )
 
 from .beams import LG
+
+from .plotting import (
+    plot_intensity,
+    plot_phase,
+    plot_complex,
+    plot_beam,
+)
