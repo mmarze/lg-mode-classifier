@@ -1,0 +1,13 @@
+
+
+def plot_intensity(field):
+    ...
+
+def plot_phase(field):
+    ...
+
+def plot_complex(field):
+    ...
+
+def plot_beam(field):
+    ...
