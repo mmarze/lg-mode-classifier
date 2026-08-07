@@ -1,0 +1,32 @@
+import numpy as np
+
+from lgbeam.mesh import create_mesh
+from lgbeam.optics import zR
+from lgbeam.beams import LG
+from lgbeam.plotting import plot_intensity
+
+
+# Create mesh
+r, phi = create_mesh(
+    L=1e-3, 
+    N=512
+)
+
+z_r = zR(w0=500e-6, n=1.0, wavelength=532e-9)
+for z in np.linspace(0, 2*z_r, 6):
+
+    # Calculate Laguerre-Gauss beam
+    beam = LG(
+        p=0, 
+        l=1, 
+        r=r,
+        phi=phi,
+        z=z,
+        w0=500e-6,
+        wavelength=532e-9,
+        n=1.0
+        )
+
+    # Plot beam intensity
+    pixel_size = 2 * 1e-3 / 512
+    plot_intensity(beam, title=f"Intenisty, $LG_{10}$, z={z:.4f} m", dx=pixel_size, dy=pixel_size)

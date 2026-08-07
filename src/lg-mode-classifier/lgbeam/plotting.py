@@ -1,8 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import EngFormatter
 
 
-def plot_intensity(field: np.ndarray, title="Intensity", cmap="inferno"):
+def plot_intensity(field: np.ndarray, title="Intensity", cmap="inferno", 
+                   dx: int | float | None = None, dy: int | float | None = None):
     """
     Plot the intensity of a complex electric field.
 
@@ -11,9 +13,13 @@ def plot_intensity(field: np.ndarray, title="Intensity", cmap="inferno"):
     field : np.ndarray
         Complex electric-field amplitude.
     title : str
-        Plot title.
+        Plot title (default: "Intensity").
     cmap : str
-        Matplotlib colormap.
+        Matplotlib colormap (default: inferno).
+    dx: int or float
+        X pixel size in meters. If not provided, the axis is in pixels. Musy be positive.
+    dy: int or float
+        Y pixel size in meters. If not provided, the axis is in pixels. Must be positive.
 
     Returns
     -------
@@ -22,17 +28,30 @@ def plot_intensity(field: np.ndarray, title="Intensity", cmap="inferno"):
 
     intensity = np.abs(field)**2
 
-    plt.figure(figsize=(6, 5))
-    plt.imshow(intensity, cmap=cmap)
-    plt.colorbar(label="Intensity $|U|^2$")
+    fig, ax = plt.subplots(figsize=(6, 5))
+
+    if dx is not None and dy is not None:
+        ny, nx = intensity.shape
+        extent = [- nx * dx / 2, nx * dx / 2, - ny * dy / 2, ny * dy / 2]
+        im = ax.imshow(intensity, cmap=cmap, extent=extent)
+        ax.set_xlabel("X")
+        ax.set_ylabel("Y")
+        ax.xaxis.set_major_formatter(EngFormatter(unit="m"))
+        ax.yaxis.set_major_formatter(EngFormatter(unit="m"))
+        ax.tick_params(axis='x', labelrotation=45)
+    else:
+        im = ax.imshow(intensity, cmap=cmap)
+        ax.set_xlabel("X pixel")
+        ax.set_ylabel("Y pixel")
+
+    fig.colorbar(im, label="Intensity $|U|^2$")
     plt.title(title)
-    plt.xlabel("X pixel")
-    plt.ylabel("Y pixel")
     plt.tight_layout()
     plt.show()
 
 
-def plot_phase(field: np.ndarray, title="Phase", cmap="twilight"):
+def plot_phase(field: np.ndarray, title="Phase", cmap="inferno",
+               dx: int | float | None = None, dy: int | float | None = None):
     """
     Plot the phase distribution of a complex electric field.
 
@@ -40,6 +59,14 @@ def plot_phase(field: np.ndarray, title="Phase", cmap="twilight"):
     ----------
     field : np.ndarray
         Complex electric-field amplitude.
+     title : str
+            Plot title (default: "Phase").
+    cmap : str
+        Matplotlib colormap (default: inferno).
+    dx: int or float
+        X pixel size in meters. If not provided, the axis is in pixels. Musy be positive.
+    dy: int or float
+        Y pixel size in meters. If not provided, the axis is in pixels. Must be positive.
 
     Returns
     -------
@@ -48,18 +75,24 @@ def plot_phase(field: np.ndarray, title="Phase", cmap="twilight"):
 
     phase = np.angle(field)
 
-    plt.figure(figsize=(6, 5))
-    plt.imshow(
-        phase,
-        cmap=cmap,
-        vmin=-np.pi,
-        vmax=np.pi
-    )
+    fig, ax = plt.subplots(figsize=(6, 5))
 
-    plt.colorbar(label="Phase [rad]")
+    if dx is not None and dy is not None:
+        ny, nx = phase.shape
+        extent = [- nx * dx / 2, nx * dx / 2, - ny * dy / 2, ny * dy / 2]
+        im = ax.imshow(phase, cmap=cmap, extent=extent)
+        ax.set_xlabel("X")
+        ax.set_ylabel("Y")
+        ax.xaxis.set_major_formatter(EngFormatter(unit="m"))
+        ax.yaxis.set_major_formatter(EngFormatter(unit="m"))
+        ax.tick_params(axis='x', labelrotation=45)
+    else:
+        im = ax.imshow(phase, cmap=cmap)
+        ax.set_xlabel("X pixel")
+        ax.set_ylabel("Y pixel")
+
+    fig.colorbar(im, label="Phase [rad]")
     plt.title(title)
-    plt.xlabel("x pixel")
-    plt.ylabel("y pixel")
     plt.tight_layout()
     plt.show()
 
