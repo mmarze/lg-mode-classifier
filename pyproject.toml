@@ -18,8 +18,8 @@ dependencies = [
 ]
 
 [tool.setuptools]
-package-dir = {"" = "src/lg-mode-classifier"}
+package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
-where = ["src/lg-mode-classifier"]
+where = ["src"]
 include = ["lgbeam*"]
