@@ -35,22 +35,22 @@ def plot_intensity(field: np.ndarray, title="Intensity", cmap="inferno",
             f"field must be an np.ndarray, got {type(field).__name__}."
         )
 
-    if not isinstance(title, (str, None)):
+    if not isinstance(title, (str,type(None))):
         raise TypeError(
             f"title must be a string, got {type(title).__name__}."
         )
 
-    if not isinstance(cmap, (str, None)):
+    if not isinstance(cmap, (str, type(None))):
         raise TypeError(
             f"cmap must be a string, got {type(cmap).__name__}."
         )
 
-    if not isinstance(dx, (int, float, np.integer, np.floating, None)):
+    if not isinstance(dx, (int, float, np.integer, np.floating, type(None))):
         raise TypeError(
             f"dx must be a real number, got {type(dx).__name__}."
         )
 
-    if not isinstance(dy, (int, float, np.integer, np.floating, None)):
+    if not isinstance(dy, (int, float, np.integer, np.floating, type(None))):
         raise TypeError(
             f"dy must be a real number, got {type(dy).__name__}."
         )
@@ -59,16 +59,16 @@ def plot_intensity(field: np.ndarray, title="Intensity", cmap="inferno",
     if not np.all(np.isfinite(field)):
         raise ValueError("field must be finite.")
 
-    if not np.isfinite(dx):
+    if dx is not None and not np.isfinite(dx):
         raise ValueError("dx must be finite.")
 
-    if not np.isfinite(dy):
+    if dy is not None and not np.isfinite(dy):
         raise ValueError("dy must be finite.")
 
-    if dx <= 0:
+    if dx is not None and dx <= 0:
         raise ValueError("dx must be positive.")
 
-    if dy <= 0:
+    if dy is not None and dy <= 0:
         raise ValueError("dy must be positive.")
 
     # ---------- Plot ----------
@@ -130,22 +130,22 @@ def plot_phase(field: np.ndarray, title="Phase", cmap="inferno",
             f"field must be an np.ndarray, got {type(field).__name__}."
         )
 
-    if not isinstance(title, (str, None)):
+    if not isinstance(title, (str, type(None))):
         raise TypeError(
             f"title must be a string, got {type(title).__name__}."
         )
 
-    if not isinstance(cmap, (str, None)):
+    if not isinstance(cmap, (str, type(None))):
         raise TypeError(
             f"cmap must be a string, got {type(cmap).__name__}."
         )
 
-    if not isinstance(dx, (int, float, np.integer, np.floating, None)):
+    if not isinstance(dx, (int, float, np.integer, np.floating, type(None))):
         raise TypeError(
             f"dx must be a real number, got {type(dx).__name__}."
         )
 
-    if not isinstance(dy, (int, float, np.integer, np.floating, None)):
+    if not isinstance(dy, (int, float, np.integer, np.floating, type(None))):
         raise TypeError(
             f"dy must be a real number, got {type(dy).__name__}."
         )
@@ -154,16 +154,16 @@ def plot_phase(field: np.ndarray, title="Phase", cmap="inferno",
     if not np.all(np.isfinite(field)):
         raise ValueError("field must be finite.")
 
-    if not np.isfinite(dx):
+    if dx is not None and not np.isfinite(dx):
         raise ValueError("dx must be finite.")
 
-    if not np.isfinite(dy):
+    if dy is not None and not np.isfinite(dy):
         raise ValueError("dy must be finite.")
 
-    if dx <= 0:
+    if dx is not None and  dx <= 0:
         raise ValueError("dx must be positive.")
 
-    if dy <= 0:
+    if dy is not None and  dy <= 0:
         raise ValueError("dy must be positive.")
 
     # ---------- Plot ----------
@@ -226,22 +226,22 @@ def plot_complex(field: np.ndarray, title="Complex field", cmap="RdBu",
             f"field must be an np.ndarray, got {type(field).__name__}."
         )
 
-    if not isinstance(title, (str, None)):
+    if not isinstance(title, (str, type(None))):
         raise TypeError(
             f"title must be a string, got {type(title).__name__}."
         )
 
-    if not isinstance(cmap, (str, None)):
+    if not isinstance(cmap, (str, type(None))):
         raise TypeError(
             f"cmap must be a string, got {type(cmap).__name__}."
         )
 
-    if not isinstance(dx, (int, float, np.integer, np.floating, None)):
+    if not isinstance(dx, (int, float, np.integer, np.floating, type(None))):
         raise TypeError(
             f"dx must be a real number, got {type(dx).__name__}."
         )
 
-    if not isinstance(dy, (int, float, np.integer, np.floating, None)):
+    if not isinstance(dy, (int, float, np.integer, np.floating, type(None))):
         raise TypeError(
             f"dy must be a real number, got {type(dy).__name__}."
         )
@@ -250,16 +250,16 @@ def plot_complex(field: np.ndarray, title="Complex field", cmap="RdBu",
     if not np.all(np.isfinite(field)):
         raise ValueError("field must be finite.")
 
-    if not np.isfinite(dx):
+    if dx is not None and not np.isfinite(dx):
         raise ValueError("dx must be finite.")
 
-    if not np.isfinite(dy):
+    if dy is not None and not np.isfinite(dy):
         raise ValueError("dy must be finite.")
 
-    if dx <= 0:
+    if dx is not None and dx <= 0:
         raise ValueError("dx must be positive.")
 
-    if dy <= 0:
+    if dy is not None and  dy<= 0:
         raise ValueError("dy must be positive.")
 
     # ---------- Plot ----------
@@ -321,9 +321,9 @@ def plot_beam(field: np.ndarray, title="Laguerre-Gaussian beam", cmap=["inferno"
         Plot title (default: "Laguerre-Gaussian beam").
     cmap : list of str
         Matplotlib colormap (default: inferno (intensity), inferno (phase), RdBu (complex field)).
-    dx: int or float
+    dx : int or float
         X pixel size in meters. If not provided, the axis is in pixels. Musy be positive.
-    dy: int or float
+    dy : int or float
         Y pixel size in meters. If not provided, the axis is in pixels. Must be positive.
 
     Returns
@@ -341,22 +341,22 @@ def plot_beam(field: np.ndarray, title="Laguerre-Gaussian beam", cmap=["inferno"
             f"field must be an np.ndarray, got {type(field).__name__}."
         )
 
-    if not isinstance(title, (str, None)):
+    if not isinstance(title, (str, type(None))):
         raise TypeError(
             f"title must be a string, got {type(title).__name__}."
         )
 
-    if not isinstance(cmap, (list, None)):
+    if not isinstance(cmap, (list, type(None))):
         raise TypeError(
             f"cmap must be a list of strings, got {type(cmap).__name__}."
         )
 
-    if not isinstance(dx, (int, float, np.integer, np.floating, None)):
+    if not isinstance(dx, (int, float, np.integer, np.floating, type(None))):
         raise TypeError(
             f"dx must be a real number, got {type(dx).__name__}."
         )
 
-    if not isinstance(dy, (int, float, np.integer, np.floating, None)):
+    if not isinstance(dy, (int, float, np.integer, np.floating, type(None))):
         raise TypeError(
             f"dy must be a real number, got {type(dy).__name__}."
         )
@@ -365,16 +365,16 @@ def plot_beam(field: np.ndarray, title="Laguerre-Gaussian beam", cmap=["inferno"
     if not np.all(np.isfinite(field)):
         raise ValueError("field must be finite.")
 
-    if not np.isfinite(dx):
+    if dx is not None and not np.isfinite(dx):
         raise ValueError("dx must be finite.")
 
-    if not np.isfinite(dy):
+    if dy is not None and not np.isfinite(dy):
         raise ValueError("dy must be finite.")
 
-    if dx <= 0:
+    if dx is not None and dx <= 0:
         raise ValueError("dx must be positive.")
 
-    if dy <= 0:
+    if dy is not None and dy <= 0:
         raise ValueError("dy must be positive.")
 
     # ---------- Plot ----------
