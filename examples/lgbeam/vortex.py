@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 from lgbeam.mesh import create_mesh
 from lgbeam.beams import LG
 from lgbeam.plotting import plot_intensity, plot_phase
@@ -23,8 +25,11 @@ beam = LG(
 
 # Plot beam intensity
 pixel_size = 2 * 1e-3 / 512
-plot_intensity(beam, title="Intenisty, $LG_{10}$", dx=pixel_size, dy=pixel_size)
+fig1, ax1 = plot_intensity(beam, title="Intenisty, $LG_{10}$", dx=pixel_size, dy=pixel_size)
+plt.show()
+plt.close(fig1)
 
 # Plot beam phase
-pixel_size = 2 * 1e-3 / 512
-plot_phase(beam, title="Phase, $LG_{10}$",dx=pixel_size, dy=pixel_size)
+plt2, ax2 = plot_phase(beam, title="Phase, $LG_{10}$",dx=pixel_size, dy=pixel_size)
+plt.show()
+plt.close(fig2)

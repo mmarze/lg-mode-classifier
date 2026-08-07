@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 from lgbeam.mesh import create_mesh
 from lgbeam.optics import zR
@@ -29,4 +30,6 @@ for z in np.linspace(0, 2*z_r, 6):
 
     # Plot beam intensity
     pixel_size = 2 * 1e-3 / 512
-    plot_intensity(beam, title=f"Intenisty, $LG_{10}$, z={z:.4f} m", dx=pixel_size, dy=pixel_size)
+    fig1, ax1 = plot_intensity(beam, title=f"Intenisty, $LG_{10}$, z={z:.2f} m", dx=pixel_size, dy=pixel_size)
+    plt.show()
+    plt.close(fig1)

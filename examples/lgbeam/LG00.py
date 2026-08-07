@@ -1,6 +1,8 @@
+import matplotlib.pyplot as plt
+
 from lgbeam.mesh import create_mesh
 from lgbeam.beams import LG
-from lgbeam.plotting import plot_intensity
+from lgbeam.plotting import plot_intensity, plot_complex, plot_beam
 
 
 # Create mesh
@@ -23,4 +25,15 @@ beam = LG(
 
 # Plot the beam
 pixel_size = 2 * 1e-3 / 512
-plot_intensity(beam, title="Intenisty, $LG_{00}$" , dx=pixel_size, dy=pixel_size)
+
+fig1, axis1 = plot_intensity(beam, title="Intenisty, $LG_{00}$" , dx=pixel_size, dy=pixel_size)
+plt.show()
+plt.close(fig1)
+
+fig2, axis2 = plot_complex(beam, title="Complex field, $LG_{00}$" , dx=pixel_size, dy=pixel_size)
+plt.show()
+plt.close(fig2)
+
+fig3, ax3 = plot_beam(beam, title="Complex field, $LG_{00}$" , dx=pixel_size, dy=pixel_size)
+plt.show()
+plt.close(fig3)

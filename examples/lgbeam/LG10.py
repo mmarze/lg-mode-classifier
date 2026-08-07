@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 from lgbeam.mesh import create_mesh
 from lgbeam.beams import LG
 from lgbeam.plotting import plot_intensity
@@ -23,4 +25,7 @@ beam = LG(
 
 # Plot the beam
 pixel_size = 2 * 1e-3 / 512
-plot_intensity(beam, title="Intenisty, $LG_{10}$", dx=pixel_size, dy=pixel_size)
+
+fig1, ax1 = plot_intensity(beam, title="Intenisty, $LG_{10}$", dx=pixel_size, dy=pixel_size)
+plt.show()
+plt.close(fig1)
