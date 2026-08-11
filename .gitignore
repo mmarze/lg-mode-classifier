@@ -19,6 +19,5 @@ docs/build/
 docs/source/.doctrees/
 docs/source/.DS_Store
 
-src/lgbeam/dataset/beam.py
-src/lgbeam/dataset/generate.py
-src/lgbeam/dataset/simulator.py
+# Docker output
+output
