@@ -102,11 +102,6 @@ class Sensor:
             )
 
         # ---------- Value checking ----------
-        if not np.isfinite(width):
-            raise ValueError("Sensor width must be finite.")
-
-        if not np.isfinite(height):
-            raise ValueError("Sensor height must be finite.")
 
         if not np.isfinite(pixel_size):
             raise ValueError("Sensor pixel size must be finite.")
@@ -122,12 +117,6 @@ class Sensor:
 
         if not np.isfinite(full_well):
             raise ValueError("Sensor full well must be finite.")
-
-        if not np.isfinite(adc_bits):
-            raise ValueError("Sensor ADC bits must be finite.")
-
-        if seed is not None and not np.isfinite(seed):
-            raise ValueError("Seed must be finite.")
 
         if width <= 0:
             raise ValueError("Width must be positive")
@@ -263,8 +252,8 @@ class Sensor:
         image_in_half_x //= 2
         image_in_half_y //= 2
 
-        photons = photons[image_in_half_x - self.half_x:image_in_half_x - self.half_x + self.width,
-                          image_in_half_y - self.half_y:image_in_half_y - self.half_y + self.height]
+        photons = photons[image_in_half_y - self.half_y:image_in_half_y - self.half_y + self.height,
+                          image_in_half_x - self.half_x:image_in_half_x - self.half_x + self.width]
 
         # Photons to electrons
         electrons = self.rng.poisson(
