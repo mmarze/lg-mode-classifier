@@ -1,11 +1,16 @@
 import numpy as np
 import pytest
 
-from lgbeam.beams import zR, R_z, w_z, wavenumber, psi
+from lgbeam.beams import (Rayleigh_range, 
+                          radius_of_curvature, 
+                          beam_width_z, 
+                          wavenumber, 
+                          psi
+                          )
 
 
 # ==========================================================
-# zR
+# Rayleigh range zR
 # ==========================================================
 
 def test_zR_correct_value():
@@ -15,7 +20,7 @@ def test_zR_correct_value():
 
     expected = np.pi * w0**2 * n / wavelength
 
-    assert np.isclose(zR(w0, n, wavelength), expected)
+    assert np.isclose(Rayleigh_range(w0, n, wavelength), expected)
 
 
 @pytest.mark.parametrize(
@@ -23,7 +28,7 @@ def test_zR_correct_value():
     [100e-9, 1e-3],
 )
 def test_zR_boundary_wavelengths(wavelength):
-    assert np.isfinite(zR(1e-3, 1.0, wavelength))
+    assert np.isfinite(Rayleigh_range(1e-3, 1.0, wavelength))
 
 
 @pytest.mark.parametrize(
@@ -37,7 +42,7 @@ def test_zR_boundary_wavelengths(wavelength):
 )
 def test_zR_type_errors(w0, n, wavelength):
     with pytest.raises(TypeError):
-        zR(w0, n, wavelength)
+        Rayleigh_range(w0, n, wavelength)
 
 
 @pytest.mark.parametrize(
@@ -55,11 +60,11 @@ def test_zR_type_errors(w0, n, wavelength):
 )
 def test_zR_value_errors(w0, n, wavelength):
     with pytest.raises(ValueError):
-        zR(w0, n, wavelength)
+        Rayleigh_range(w0, n, wavelength)
 
 
 # ==========================================================
-# R_z
+# radius of curvature R_z
 # ==========================================================
 
 def test_R_z_correct_value():
@@ -68,11 +73,11 @@ def test_R_z_correct_value():
 
     expected = z * (1 + (zr / z) ** 2)
 
-    assert np.isclose(R_z(z, zr), expected)
+    assert np.isclose(radius_of_curvature(z, zr), expected)
 
 
 def test_R_z_zero_returns_inf():
-    assert np.isinf(R_z(0, 1.0))
+    assert np.isinf(radius_of_curvature(0, 1.0))
 
 
 @pytest.mark.parametrize(
@@ -84,7 +89,7 @@ def test_R_z_zero_returns_inf():
 )
 def test_R_z_type_errors(z, zr):
     with pytest.raises(TypeError):
-        R_z(z, zr)
+        radius_of_curvature(z, zr)
 
 
 @pytest.mark.parametrize(
@@ -98,16 +103,16 @@ def test_R_z_type_errors(z, zr):
 )
 def test_R_z_value_errors(z, zr):
     with pytest.raises(ValueError):
-        R_z(z, zr)
+        radius_of_curvature(z, zr)
 
 
 # ==========================================================
-# w_z
+# beam width @ given z w_z
 # ==========================================================
 
 def test_w_z_at_focus():
     assert np.isclose(
-        w_z(1e-3, 0, 2.0),
+        beam_width_z(1e-3, 0, 2.0),
         1e-3,
     )
 
@@ -120,7 +125,7 @@ def test_w_z_correct_value():
     expected = w0 * np.sqrt(1 + (z / zr) ** 2)
 
     assert np.isclose(
-        w_z(w0, z, zr),
+        beam_width_z(w0, z, zr),
         expected,
     )
 
@@ -135,7 +140,7 @@ def test_w_z_correct_value():
 )
 def test_w_z_type_errors(w0, z, zr):
     with pytest.raises(TypeError):
-        w_z(w0, z, zr)
+        beam_width_z(w0, z, zr)
 
 
 @pytest.mark.parametrize(
@@ -151,7 +156,7 @@ def test_w_z_type_errors(w0, z, zr):
 )
 def test_w_z_value_errors(w0, z, zr):
     with pytest.raises(ValueError):
-        w_z(w0, z, zr)
+        beam_width_z(w0, z, zr)
 
 
 # ==========================================================

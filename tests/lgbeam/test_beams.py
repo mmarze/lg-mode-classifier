@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from lgbeam.beams import LG
+from lgbeam.beams import LaguerreGauss
 
 
 # ==========================================================
@@ -14,7 +14,7 @@ def test_LG_returns_complex_array():
     r = np.linspace(0, 1e-3, 50)
     phi = np.zeros_like(r)
 
-    U = LG(
+    U = LaguerreGauss(
         p=0,
         l=0,
         r=r,
@@ -35,7 +35,7 @@ def test_LG_no_nan_or_inf():
     r = np.linspace(0, 2e-3, 100)
     phi = np.linspace(-np.pi, np.pi, 100)
 
-    U = LG(
+    U = LaguerreGauss(
         1,
         2,
         r,
@@ -58,7 +58,7 @@ def test_LG_fundamental_mode_nonzero_at_origin():
     r = np.array([0.0])
     phi = np.array([0.0])
 
-    U = LG(
+    U = LaguerreGauss(
         0,
         0,
         r,
@@ -77,7 +77,7 @@ def test_LG_vortex_zero_at_origin():
     r = np.array([0.0])
     phi = np.array([0.0])
 
-    U = LG(
+    U = LaguerreGauss(
         0,
         2,
         r,
@@ -96,7 +96,7 @@ def test_LG_negative_l_same_amplitude():
     r = np.linspace(0, 1e-3, 20)
     phi = np.linspace(-np.pi, np.pi, 20)
 
-    U1 = LG(
+    U1 = LaguerreGauss(
         1,
         2,
         r,
@@ -106,7 +106,7 @@ def test_LG_negative_l_same_amplitude():
         532e-9,
     )
 
-    U2 = LG(
+    U2 = LaguerreGauss(
         1,
         -2,
         r,
@@ -135,7 +135,7 @@ def test_LG_negative_l_same_amplitude():
 def test_LG_type_errors(r, phi):
 
     with pytest.raises(TypeError):
-        LG(
+        LaguerreGauss(
             0,
             0,
             r,
@@ -165,7 +165,7 @@ def test_LG_type_errors(r, phi):
 def test_LG_value_errors(r, phi):
 
     with pytest.raises(ValueError):
-        LG(
+        LaguerreGauss(
             0,
             0,
             r,
@@ -205,7 +205,7 @@ def test_LG_helper_validation(kwargs):
     params.update(kwargs)
 
     with pytest.raises(ValueError):
-        LG(**params)
+        LaguerreGauss(**params)
 
 
 # ==========================================================
@@ -218,7 +218,7 @@ def test_LG_phi_boundaries():
 
     phi = np.array([-np.pi, np.pi])
 
-    U = LG(
+    U = LaguerreGauss(
         0,
         1,
         r,
@@ -236,7 +236,7 @@ def test_LG_zero_radius_allowed():
     r = np.zeros(5)
     phi = np.zeros(5)
 
-    U = LG(
+    U = LaguerreGauss(
         0,
         0,
         r,
