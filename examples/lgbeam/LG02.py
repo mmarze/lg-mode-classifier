@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 from lgbeam.mesh import create_mesh
-from lgbeam.beams import LG
+from lgbeam.beams import LaguerreGauss
 from lgbeam.plotting import plot_intensity
 
 
@@ -12,7 +12,7 @@ r, phi = create_mesh(
 )
 
 # Calculate Laguerre-Gauss beam
-beam = LG(
+beam = LaguerreGauss(
     p=2, 
     l=0, 
     r=r,

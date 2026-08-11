@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from lgbeam.mesh import create_mesh
-from lgbeam.optics import zR
-from lgbeam.beams import LG
+from lgbeam.optics import Rayleigh_range
+from lgbeam.beams import LaguerreGauss
 from lgbeam.plotting import plot_intensity
 
 
@@ -13,11 +13,11 @@ r, phi = create_mesh(
     N=512
 )
 
-z_r = zR(w0=500e-6, n=1.0, wavelength=532e-9)
+z_r = Rayleigh_range(w0=500e-6, n=1.0, wavelength=532e-9)
 for z in np.linspace(0, 2*z_r, 6):
 
     # Calculate Laguerre-Gauss beam
-    beam = LG(
+    beam = LaguerreGauss(
         p=0, 
         l=1, 
         r=r,
