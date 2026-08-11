@@ -1,5 +1,11 @@
 import numpy as np
 import json
+import matplotlib.pyplot as plt
+
+from lgbeam.mesh import create_mesh
+from lgbeam.beams import LaguerreGauss
+from lgbeam.plotting import plot_intensity
+from lgbeam.dataset.config import WAVELENGTH, EXPOSURE, W0_RANGE, L, N
 
 
 class Sensor:
@@ -119,7 +125,7 @@ class Sensor:
         if not np.isfinite(adc_bits):
             raise ValueError("Sensor ADC bits must be finite.")
 
-        if not None and not np.isfinite(seed):
+        if seed is not None and not np.isfinite(seed):
             raise ValueError("Seed must be finite.")
 
         if width <= 0:
@@ -214,3 +220,33 @@ class Sensor:
 
         with open(filename, "w") as f:
             json.dump(config, f, indent=4)
+
+
+if __name__ == '__main__':
+    sony_imx541 = Sensor(
+                    width=4512, 
+                    height=4576, 
+                    pixel_size=2.74e-6, 
+                    qe=0.68,
+                    read_noise=2.3, 
+                    dark_current=22, 
+                    full_well=9_400, 
+                    adc_bits=12,
+                    seed=None
+    )
+
+    r, phi = create_mesh(L, N)
+    photons = LaguerreGauss(p=0, 
+                            l=0, 
+                            r=r, 
+                            phi=phi, 
+                            w0=(W0_RANGE[0]+W0_RANGE[1])/2 , 
+                            z=0, 
+                            wavelength=WAVELENGTH
+                            )
+
+    photons = np.abs(photons) / 2.5
+    
+    image = sony_imx541.capture(photons, EXPOSURE)
+    fig, ax = plot_intensity(image)
+    plt.show()
