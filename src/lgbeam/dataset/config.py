@@ -34,4 +34,4 @@ L = 2e-3
 # Create bigger image -> shifting realized by cropping the image
 N = max(SENSOR_SIZE) + 2 * CENTER_SHIFT
 
-N_IMAGES_PER_CLASS = 1 # 9000
+N_IMAGES_PER_CLASS = 1
