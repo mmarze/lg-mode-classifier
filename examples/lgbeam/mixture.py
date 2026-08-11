@@ -1,9 +1,13 @@
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 from lgbeam.mesh import create_mesh
 from lgbeam.beams import LaguerreGauss
 from lgbeam.plotting import plot_intensity
 
+
+output_dir = Path("output")
+output_dir.mkdir(exist_ok=True)
 
 # Create mesh
 r, phi = create_mesh(
@@ -40,5 +44,6 @@ field = 0.2 * beam1 + 0.8 * beam2
 pixel_size = 2 * 1e-3 / 512
 
 fig1, ax1 = plot_intensity(field, title=r"Intenisty, $0.2 \cdot LG_{00} + 0.8 \cdot LG_{02}$", dx=pixel_size, dy=pixel_size)
-plt.show()
-plt.close(fig1)
+# plt.show()
+# plt.close(fig1)
+plt.savefig(output_dir/'Plot_beam_mixed.png', dpi=600)

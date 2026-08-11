@@ -31,16 +31,16 @@ beam = LaguerreGauss(
 pixel_size = 2 * 1e-3 / 512
 
 fig1, axis1 = plot_intensity(beam, title="Intenisty, $LG_{00}$" , dx=pixel_size, dy=pixel_size)
-plt.show()
+# plt.show()
 # plt.close(fig1)
 plt.savefig(output_dir/'Intensity_LG00.png', dpi=600)
 
 fig2, axis2 = plot_complex(beam, title="Complex field, $LG_{00}$" , dx=pixel_size, dy=pixel_size)
-plt.show()
+# plt.show()
 # plt.close(fig2)
 plt.savefig(output_dir/'Complex_field_LG00.png', dpi=600)
 
 fig3, ax3 = plot_beam(beam, title="Laguerre-Gaussian beam, $LG_{00}$" , dx=pixel_size, dy=pixel_size)
-plt.show()
+# plt.show()
 # plt.close(fig3)
 plt.savefig(output_dir/'Plot_beam_LG00.png', dpi=600)
