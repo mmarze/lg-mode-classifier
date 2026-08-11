@@ -1,9 +1,9 @@
 import numpy as np
 
 from .optics import (
-    zR,
-    R_z,
-    w_z,
+    Rayleigh_range,
+    radius_of_curvature,
+    beam_width_z,
     wavenumber,
     psi,
 )
@@ -14,7 +14,7 @@ from .laguerre import (
 )
 
 
-def LG(p: int, l: int, r: np.ndarray, phi: np.ndarray, z: int | float, w0: int | float, wavelength: float, n: int | float = 1.0) -> np.ndarray:
+def LaguerreGauss(p: int, l: int, r: np.ndarray, phi: np.ndarray, z: int | float, w0: int | float, wavelength: float, n: int | float = 1.0) -> np.ndarray:
     """
     # Calculate the Laguerre-Gaussian mode.
 
@@ -82,10 +82,10 @@ def LG(p: int, l: int, r: np.ndarray, phi: np.ndarray, z: int | float, w0: int |
           
     # ---------- Calculate the Laguerre-Gaussian mode ----------
 
-    zr = zR(w0, n, wavelength)
-    wz = w_z(w0, z, zr)
+    zr = Rayleigh_range(w0, n, wavelength)
+    wz = beam_width_z(w0, z, zr)
     kz = wavenumber(wavelength)
-    Rz = R_z(z, zr)
+    Rz = radius_of_curvature(z, zr)
 
     C = C_lp(p, l)
 

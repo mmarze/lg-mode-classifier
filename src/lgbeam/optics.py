@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def zR(w0: int | float, n: int | float, wavelength: float) -> float:
+def Rayleigh_range(w0: int | float, n: int | float, wavelength: float) -> float:
     """
     Calculate the beam's Rayleigh range.
     
@@ -31,34 +31,34 @@ def zR(w0: int | float, n: int | float, wavelength: float) -> float:
     # ---------- Type checking ----------
     if not isinstance(w0, (int, float, np.integer, np.floating)):
         raise TypeError(
-            f"w0 must be a real number, got {type(w0).__name__}."
+            f"Beam waist radius w0 must be a real number, got {type(w0).__name__}."
         )
 
     if not isinstance(n, (int, float, np.integer, np.floating)):
         raise TypeError(
-            f"n must be a real number, got {type(n).__name__}."
+            f"Refractive index n must be a real number, got {type(n).__name__}."
         )
 
     if not isinstance(wavelength, (float, np.floating)):
         raise TypeError(
-            f"wavelength must be a real number, got {type(wavelength).__name__}."
+            f"Wavelength must be a real number, got {type(wavelength).__name__}."
         )
 
     # ---------- Value checking ----------
     if not np.isfinite(w0):
-        raise ValueError("w0 must be finite.")
+        raise ValueError("Beam waist radius w0 must be finite.")
 
     if not np.isfinite(n):
-        raise ValueError("n must be finite.")
+        raise ValueError("Refractive index n must be finite.")
 
     if not np.isfinite(wavelength):
-        raise ValueError("wavelength must be finite.")
+        raise ValueError("Wavelength must be finite.")
 
     if w0 <= 0:
-        raise ValueError("w0 must be positive.")
+        raise ValueError("Beam waist radius w0 must be positive.")
 
     if n <= 0:
-        raise ValueError("n must be positive.")
+        raise ValueError("Refractive index n must be positive.")
 
     if not (100e-9 <= wavelength <= 1e-3):
         raise ValueError(
@@ -72,7 +72,7 @@ def zR(w0: int | float, n: int | float, wavelength: float) -> float:
     return zr
 
 
-def R_z(z: int | float, z_r: int | float) -> float:
+def radius_of_curvature(z: int | float, z_r: int | float) -> float:
     """
     Calculate the radius of curvature R(z) of the beam's wavefronts at z.
     
@@ -99,23 +99,23 @@ def R_z(z: int | float, z_r: int | float) -> float:
     # ---------- Type checking ----------
     if not isinstance(z_r, (int, float, np.integer, np.floating)):
         raise TypeError(
-            f"z_r must be a real number, got {type(z_r).__name__}."
+            f"Rayleigh range z_R must be a real number, got {type(z_r).__name__}."
         )
 
     if not isinstance(z, (int, float, np.integer, np.floating)):
         raise TypeError(
-            f"z must be a real number, got {type(z).__name__}."
+            f"Distance from beam waist z must be a real number, got {type(z).__name__}."
         )
 
     # ---------- Value checking ----------
     if not np.isfinite(z_r):
-        raise ValueError("z_r must be finite.")
+        raise ValueError("Rayleigh range z_r must be finite.")
 
     if not np.isfinite(z):
-        raise ValueError("z must be finite.")
+        raise ValueError("Distance from beam waist z must be finite.")
 
     if z_r <= 0:
-        raise ValueError("z_r must be positive.")
+        raise ValueError("Rayleigh range z_r must be positive.")
     
     # ---------- Calculate radius of curvature R(z) ----------
     
@@ -127,7 +127,7 @@ def R_z(z: int | float, z_r: int | float) -> float:
     return rz
 
 
-def w_z(w0: int | float, z: int | float, z_r: int | float) -> float:
+def beam_width_z(w0: int | float, z: int | float, z_r: int | float) -> float:
     """
     Calculate the beam width w(z) at the position z from the beam waist.
     
@@ -157,34 +157,34 @@ def w_z(w0: int | float, z: int | float, z_r: int | float) -> float:
     # ---------- Type checking ----------
     if not isinstance(w0, (int, float, np.integer, np.floating)):
         raise TypeError(
-            f"w0 must be a real number, got {type(w0).__name__}."
+            f"Beam waist radius w0 must be a real number, got {type(w0).__name__}."
         )
 
     if not isinstance(z_r, (int, float, np.integer, np.floating)):
         raise TypeError(
-            f"z_r must be a real number, got {type(z_r).__name__}."
+            f"Rayleigh range z_r must be a real number, got {type(z_r).__name__}."
         )
 
     if not isinstance(z, (int, float, np.integer, np.floating)):
         raise TypeError(
-            f"z must be a real number, got {type(z).__name__}."
+            f"Distance from beam waist z must be a real number, got {type(z).__name__}."
         )
 
     # ---------- Value checking ----------
     if not np.isfinite(w0):
-        raise ValueError("w0 must be finite.")
+        raise ValueError("Beam waist radius w0 must be finite.")
 
     if not np.isfinite(z_r):
-        raise ValueError("z_r must be finite.")
+        raise ValueError("Rayleigth range z_r must be finite.")
 
     if not np.isfinite(z):
-        raise ValueError("z must be finite.")
+        raise ValueError("Distance from beam waist z must be finite.")
 
     if z_r <= 0:
-        raise ValueError("z_r must be positive.")
+        raise ValueError("Rayleigth range z_r must be positive.")
 
     if w0 <= 0:
-        raise ValueError("w0 must be positive.")
+        raise ValueError("Beam waist w0 must be positive.")
     
     # ---------- Calculate the beam radius w(z) ----------
 
@@ -219,16 +219,16 @@ def wavenumber(wavelength: float) -> float:
     # ---------- Type checking ----------
     if not isinstance(wavelength, (float, np.floating)):
         raise TypeError(
-            f"wavelength must be a real number, got {type(wavelength).__name__}."
+            f"Wavelength must be a real number, got {type(wavelength).__name__}."
         )
 
     # ---------- Value checking ----------
     if not np.isfinite(wavelength):
-        raise ValueError("wavelength must be finite.")
+        raise ValueError("Wavelength must be finite.")
 
     if not (100e-9 <= wavelength <= 1e-3):
         raise ValueError(
-            "wavelength must correspond to optical radiation "
+            "Wavelength must correspond to optical radiation "
             "(approximately 100 nm to 1 mm, expressed in meters)."
         )
     
@@ -272,12 +272,12 @@ def psi(l: int, p: int, z: int | float, z_r: int | float) -> float:
     # ---------- Type checking ----------
     if not isinstance(z_r, (int, float, np.integer, np.floating)):
         raise TypeError(
-            f"z_r must be a real number, got {type(z_r).__name__}."
+            f"Rayleigh range z_r must be a real number, got {type(z_r).__name__}."
         )
 
     if not isinstance(z, (int, float, np.integer, np.floating)):
         raise TypeError(
-            f"z must be a real number, got {type(z).__name__}."
+            f"Distance from beam waist z must be a real number, got {type(z).__name__}."
         )
 
     if not isinstance(p, (int, np.integer)):
@@ -298,16 +298,16 @@ def psi(l: int, p: int, z: int | float, z_r: int | float) -> float:
         raise ValueError("l must be finite.")
 
     if not np.isfinite(z_r):
-        raise ValueError("z_r must be finite.")
+        raise ValueError("Rayleigh range z_r must be finite.")
 
     if not np.isfinite(z):
-        raise ValueError("z must be finite.")
+        raise ValueError("Distance from beam waist z must be finite.")
 
     if p < 0:
         raise ValueError("p must be non-negative.")
 
     if z_r <= 0:
-        raise ValueError("z_r must be positive.")
+        raise ValueError("Rayleigh range z_r must be positive.")
     
     # ---------- Calculate the magnitude of the Laguerre-Gaussian modes' Gouy phase shift ----------
     psi_z = (np.abs(l) + 2 * p + 1) * np.arctan(z / z_r)

@@ -100,12 +100,12 @@ def L_lp(p: int, l: int, r: np.ndarray, w_z: int | float) -> float:
 
     if not isinstance(r, np.ndarray):
         raise TypeError(
-            f"r must be a real number, got {type(r).__name__}."
+            f"Radial coordinate r must be a real number, got {type(r).__name__}."
         )
 
     if not isinstance(w_z, (int, float, np.integer, np.floating)):
         raise TypeError(
-            f"w(z) must be a real number, got {type(w_z).__name__}."
+            f"Beam width w(z) must be a real number, got {type(w_z).__name__}."
         )
 
     # ---------- Value checking ----------
@@ -116,19 +116,19 @@ def L_lp(p: int, l: int, r: np.ndarray, w_z: int | float) -> float:
         raise ValueError("l must be finite.")
 
     if not np.all(np.isfinite(r)):
-        raise ValueError("r must be finite.")
+        raise ValueError("Radial coordinate r must be finite.")
 
     if not np.isfinite(w_z):
-        raise ValueError("w(z) must be finite.")
+        raise ValueError("Beam width w(z) must be finite.")
 
     if p < 0:
         raise ValueError("p must be non-negative.")
 
     if np.any(r < 0):
-        raise ValueError("r must be non-negative.")
+        raise ValueError("Raidal coordinate must be non-negative.")
 
     if w_z <= 0:
-        raise ValueError("w(z) must be positive.")   
+        raise ValueError("Beam width w(z) must be positive.")   
     
     # ---------- Calculate the normalization constant ----------
     

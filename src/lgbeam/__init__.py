@@ -1,9 +1,9 @@
 from .mesh import create_mesh
 
 from .optics import (
-    zR,
-    R_z,
-    w_z,
+    Rayleigh_range,
+    radius_of_curvature,
+    beam_width_z,
     wavenumber,
     psi,
 )
@@ -13,7 +13,7 @@ from .laguerre import (
     L_lp,
 )
 
-from .beams import LG
+from .beams import LaguerreGauss
 
 from .plotting import (
     plot_intensity,
