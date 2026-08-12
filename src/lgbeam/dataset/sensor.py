@@ -258,24 +258,28 @@ class Sensor:
         # Photons to electrons
         electrons = self.rng.poisson(
             photons * self.qe
-        ).astype(np.float64)
+        ).astype(np.float32)
 
         # Dark current noise
         self.dark_electrons = self.rng.poisson(
             self.dark_current * exposure,
             size=photons.shape
-        )
+        ).astype(np.float32)
 
         electrons += self.dark_electrons
-        self.total_dark_electrons = self.dark_electrons.sum()
+        self.total_dark_electrons = int(self.dark_electrons.sum())
 
         # Full well saturation
         electrons = np.clip(electrons, 0, self.full_well)
 
         # Read noise 
-        self.real_read_noise = self.rng.normal(0, self.read_noise, size=photons.shape)
+        self.real_read_noise = self.rng.normal(
+            0, 
+            self.read_noise, 
+            size=photons.shape
+        ).astype(np.float32)
         electrons +=  self.real_read_noise
-        self.total_real_read_noise = self.real_read_noise.sum()
+        self.total_real_read_noise = float(self.real_read_noise.sum())
 
         # ADC conversion
         max_dn = (2 ** self.adc_bits) - 1
@@ -285,10 +289,7 @@ class Sensor:
         # Digital limits
         image = np.clip(image, 0, max_dn)
 
-        # Convert to integer image
-        image = np.round(image).astype(np.uint16)
-
-        return image
+        return np.rint(image).astype(np.uint16)
 
 
     def save_config(self, filename):
