@@ -1,7 +1,6 @@
 LG_MODES = [
     (0,0), (0,1), (0,2), 
     (1,0), (1,1), (1,2), 
-    (2,0), (2,1), (2,2)
 ]
 
 WAVELENGTH = 529e-9
@@ -34,4 +33,6 @@ L = 2e-3
 # Create bigger image -> shifting realized by cropping the image
 N = max(SENSOR_SIZE) + 2 * CENTER_SHIFT
 
-N_IMAGES_PER_CLASS = 1
+N_IMAGES_PER_CLASS = 10000
+
+DOWNSAMPLING = 9
