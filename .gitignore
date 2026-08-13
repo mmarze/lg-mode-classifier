@@ -1,12 +1,15 @@
 notes.rtf
 .vscode
 lgbeam.egg-info/
+*.egg-info/
 
 # Virtual environment
 .venv/
+venv/
 
 # Python cache
 __pycache__/
+*.py[cod]
 *.pyc
 
 # Environment variables
@@ -18,7 +21,13 @@ docs/build/
 # Sphinx doctrees
 docs/source/.doctrees/
 docs/source/.DS_Store
-docs/build
+docs/**/build
 
-# Docker output
+# Generated datasets / images
 output
+
+# Pytest
+.pytest_cache/
+
+# Test-generated output
+tests/**/output/
