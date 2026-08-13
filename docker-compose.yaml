@@ -1,0 +1,11 @@
+services:
+  examples:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+      
