@@ -18,6 +18,7 @@ docs/build/
 # Sphinx doctrees
 docs/source/.doctrees/
 docs/source/.DS_Store
+docs/build
 
 # Docker output
 output
