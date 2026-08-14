@@ -31,3 +31,12 @@ output
 
 # Test-generated output
 tests/**/output/
+
+# .DS_Store files
+src/.DS_Store
+src/lgbeam/dataset/.DS_Store
+src/lgbeam/.DS_Store
+tests/.DS_Store
+tests/dataset/.DS_Store
+tests/lgbea,/.DS_Store
+.DS_Store
