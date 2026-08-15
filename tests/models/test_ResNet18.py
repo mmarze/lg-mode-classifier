@@ -44,3 +44,5 @@ def test_resnet18_backward():
     loss.backward()
 
     assert loss.item() > 0
+    assert model.conv1.weight.grad is not None
+    assert model.fc.weight.grad is not None
