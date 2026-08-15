@@ -7,13 +7,13 @@ and dataset creation.
 """
 
 from .sensor import Sensor
-# from .beam import generate_beam
-# from .simulator import simulate
-# from .generate import generate_dataset
+
+from .generate import generate_dataset
+
+from .generate_efficiently import  generate_dataset as  generate_dataset_efficiently
 
 __all__ = [
     "Sensor",
-    # "generate_beam",
-    # "simulate",
-    # "generate_dataset",
+    "generate_dataset",
+    "generate_dataset_efficiently"
 ]
