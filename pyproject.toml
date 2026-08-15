@@ -16,6 +16,7 @@ dependencies = [
     "scipy>=1.14",
     "matplotlib>=3.9",
     "torch>=2.13",
+    "h5py>=3.16",
 ]
 
 [tool.setuptools]
