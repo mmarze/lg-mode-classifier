@@ -86,7 +86,7 @@ def _init_worker(
 def _resize_uint16(image, output_size):
     """Downsample a uint16 image while keeping uint16 output."""
     image = np.asarray(image, dtype=np.uint16)
-    pil_image = Image.fromarray(image, mode="I;16")
+    pil_image = Image.fromarray(image)
     # Image.Resampling.BOX -> an average from all pixels
     resized = pil_image.resize(output_size, resample=Image.Resampling.BOX)
     return np.asarray(resized, dtype=np.uint16)
@@ -249,6 +249,20 @@ def _mode_filename(mode_l, mode_p):
     return OUTPUT_DIR / f"mode_l{mode_l}_p{mode_p}.h5"
 
 
+def _make_image_tasks(mode, n_images_per_class, mode_seed):
+    mode_l, mode_p = mode
+    mode_rng = np.random.default_rng(mode_seed)
+
+    return (
+        (
+            mode_l,
+            mode_p,
+            int(mode_rng.integers(0, 2**32 - 1)),
+        )
+        for _ in range(n_images_per_class)
+    )
+
+
 def _generate_mode_file(
     mode,
     n_images_per_class,
@@ -268,14 +282,11 @@ def _generate_mode_file(
     output_path = _mode_filename(mode_l, mode_p)
     output_shape = (OUTPUT_SIZE[1], OUTPUT_SIZE[0]) 
 
-    mode_rng = np.random.default_rng(mode_seed)
-    tasks = (
-        (
-            mode_l,
-            mode_p,
-            int(mode_rng.integers(0, 2**32 - 1)),
-        )
-        for _ in range(n_images_per_class)
+
+    tasks = _make_image_tasks(
+        mode,
+        n_images_per_class,
+        mode_seed,
     )
 
     with h5py.File(output_path, "w") as h5:
