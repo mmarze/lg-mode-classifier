@@ -16,14 +16,14 @@ def get_predictions(
     all samples.
 
     Args:
-        model: PyTorch model to evaluate.
-        loader: DataLoader providing input images and target labels.
-        device: Device on which the model and input tensors are located.
-        prob: If True, return class probabilities. If False, return
+        model (torch.nn.Module): PyTorch model to evaluate.
+        loader (DataLoader): DataLoader providing input images and target labels.
+        device (torch.device): Device on which the model and input tensors are located.
+        prob (bool): If True, return class probabilities. If False, return
             predicted class indices.
 
     Returns:
-        A tensor containing either:
+        A tensor.Tensor containing either:
             - Predicted class indices with shape (num_samples,), or
             - Class probabilities with shape (num_samples, num_classes).
     """

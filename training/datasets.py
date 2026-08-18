@@ -421,7 +421,7 @@ class MyDataset(Dataset):
         List of paths to HDF5 files. Each file must contain an ``"images"``
         dataset.
 
-    indices : list of lists of int
+    indices : list of np.ndarray
         Lists of image indices corresponding to each file in ``files``.
         ``indices[i]`` contains the indices of images to use from
         ``files[i]``.
@@ -466,6 +466,24 @@ class MyDataset(Dataset):
     torch.Tensor
         A single image with shape ``(1, H, W)`` after scaling and the
         optional transformation.
+
+    Raises
+    ------
+    TypeError
+        If ``files`` or ``indices`` is not a list, if an element of
+        ``files`` is not a string or ``pathlib.Path``, if an element of
+        ``indices`` is not a NumPy array, or if an image index is not an
+        integer.
+
+    ValueError
+        If ``files`` and ``indices`` have different lengths, if a filepath
+        is empty, or if an image index is negative.
+
+    FileNotFoundError
+        If any path in ``files`` does not exist.
+
+    KeyError
+        If an HDF5 file does not contain an ``"images"`` dataset.
     """
 
     def __init__(self, files, indices, transform=None):
@@ -533,6 +551,9 @@ class MyDataset(Dataset):
             for file_id, file_indices in enumerate(indices)
             for image_id in file_indices
         ]
+
+        if not self.samples:
+            raise ValueError("No images selected.")
 
         self._h5_files = [None] * len(self.files)
         self._datasets = [None] * len(self.files)

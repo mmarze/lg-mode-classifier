@@ -20,19 +20,42 @@ def evaluate_model(
     collects the loss, predicted classes, target labels, and class
     probabilities for all samples.
 
-    Args:
-        model: PyTorch model to evaluate.
-        loader: DataLoader providing input images and target labels.
-        criterion: Loss function used to calculate the model loss.
-        device: Device on which the model and input tensors are located.
+    Parameters
+    ----------
+    model : torch.nn.Module
+        PyTorch model to evaluate.
+    loader : torch.utils.data.DataLoader
+        DataLoader providing input images and target labels.
+    criterion : torch.nn.Module
+        Loss function used to calculate the model loss.
+    device : torch.device
+        Device on which the model and input tensors are located.
 
-    Returns:
-        tuple:
-            loss (float): Average loss across all batches.
-            all_labels (torch.Tensor): Ground-truth labels for all samples.
-            all_predictions (torch.Tensor): Predicted class indices for all samples.
-            all_probabilities (torch.Tensor): Predicted class probabilities
-                for all samples, with shape (num_samples, num_classes).
+    Returns
+    ----------
+    loss : float
+        Average loss across all batches.
+    all_labels : torch.Tensor
+        Ground-truth labels for all samples.
+    all_predictions : torch.Tensor
+        Predicted class indices for all samples.
+    all_probabilities : torch.Tensor
+        Predicted class probabilities for all samples, with shape (num_samples, num_classes).
+
+    Raises
+    ------
+    TypeError
+        If ``model`` is not a ``torch.nn.Module``, ``loader`` is not a
+        ``torch.utils.data.DataLoader``, ``criterion`` is not a
+        ``torch.nn.Module``, ``device`` is not a ``torch.device``, or the
+        batches contain non-tensor images or labels. Also raised if labels
+        do not have an integer dtype.
+
+    ValueError
+        If the model is not located on ``device``, images do not have shape
+        ``(batch, channels, height, width)``, labels do not have shape
+        ``(batch,)``, the number of images and labels differs, or the
+        predicted probabilities for a sample do not sum approximately to 1.
     """
 
     if not isinstance(model, torch.nn.Module):
@@ -208,7 +231,7 @@ def calculate_metrics(
     Computes macro-averaged precision, recall, F1 score, and AUROC,
     as well as overall classification accuracy.
 
-    Args:
+    Parameters:
         predictions (torch.Tensor): Predicted class indices for each sample.
         probabilities (torch.Tensor): Predicted class probabilities for each
             sample, with shape (num_samples, num_classes).
