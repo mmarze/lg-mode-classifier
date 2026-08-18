@@ -17,6 +17,7 @@ dependencies = [
     "matplotlib>=3.9",
     "torch>=2.13",
     "h5py>=3.16",
+    "torchmetrics>=1.9"
 ]
 
 [tool.setuptools]
