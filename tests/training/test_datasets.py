@@ -1282,7 +1282,7 @@ def test_my_dataset_len_with_multiple_files(tmp_path):
     assert len(dataset) == 5
 
 
-def test_my_dataset_len_with_no_samples(tmp_path):
+def test_my_dataset_rejects_no_samples(tmp_path):
     file = tmp_path / "data.h5"
 
     create_h5_file(
@@ -1290,12 +1290,11 @@ def test_my_dataset_len_with_no_samples(tmp_path):
         np.zeros((2, 2, 2), dtype=np.uint16),
     )
 
-    dataset = MyDataset(
-        [file],
-        [np.array([], dtype=int)],
-    )
-
-    assert len(dataset) == 0
+    with pytest.raises(ValueError, match="No images selected"):
+        MyDataset(
+            [file],
+            [np.array([], dtype=int)],
+        )
 
 
 def test_my_dataset_get_dataset_opens_file_lazily(tmp_path):
