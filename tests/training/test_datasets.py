@@ -5,7 +5,7 @@ from pathlib import Path
 import torch
 
 
-from training.data import (
+from training.datasets import (
     ADC_MAX,
     get_indices,
     get_class_labels,

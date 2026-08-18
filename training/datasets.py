@@ -467,8 +467,10 @@ class MyDataset(Dataset):
         A single image with shape ``(1, H, W)`` after scaling and the
         optional transformation.
     """
+
     def __init__(self, files, indices, transform=None):
-    # ---------- Type checking ----------
+
+        # ---------- Type checking ----------
 
         if not isinstance(files, list):
             raise TypeError(
@@ -520,7 +522,7 @@ class MyDataset(Dataset):
                         f"Image index cannot be negative, got {image_id}."
                     )
 
-    # ---------- Store data ----------
+        # ---------- Store data ----------
 
         self.files = [Path(file) for file in files]
         self.transform = transform
@@ -573,4 +575,3 @@ class MyDataset(Dataset):
             image = self.transform(image)
 
         return image
-
