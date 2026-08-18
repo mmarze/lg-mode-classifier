@@ -476,9 +476,7 @@ def test_evaluate_model_rejects_model_on_wrong_device(
     loader,
     criterion,
 ):
-    # The model is on CPU.
-    # We tell the function to use CUDA.
-    # The function should fail before trying to move the images.
+
     with pytest.raises(
         ValueError,
         match="Model is on cpu, but device is cuda",
