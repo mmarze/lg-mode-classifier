@@ -43,5 +43,4 @@ tests/lgbea,/.DS_Store
 
 # Temporal
 notebooks
-training/train.py
 models/cnn.py
