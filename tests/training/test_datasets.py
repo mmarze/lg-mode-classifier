@@ -10,7 +10,8 @@ from training.datasets import (
     get_indices,
     get_class_labels,
     calculate_transformation_params,
-    MyDataset
+    MyDataset,
+    worker_init_fn
 )
 
 # ==========================================================
@@ -174,9 +175,13 @@ def test_get_indices_with_no_validation():
     assert isinstance(val, np.ndarray)
 
 
-# ==========================================================
-# Test get_class_labels
-# ==========================================================
+def test_get_indices_allows_train_test_sum_equal_to_one():
+    train, test, val = get_indices((0.8, 0.2), 100)
+
+    assert len(train) == 80
+    assert len(test) == 20
+    assert len(val) == 0
+
 
 # ==========================================================
 # Test get_class_labels
@@ -187,6 +192,26 @@ def assert_array_lists_equal(actual, expected):
 
     for actual_array, expected_array in zip(actual, expected):
         assert np.array_equal(actual_array, expected_array)
+
+
+def test_get_class_labels_returns_floating_labels():
+    train = [
+        np.array([0, 1]),
+        np.array([2, 3]),
+    ]
+    test = [
+        np.array([4, 5]),
+        np.array([6, 7]),
+    ]
+    val = [
+        np.array([8, 9]),
+        np.array([10, 11]),
+    ]
+
+    ctrain, ctest, cval = get_class_labels(train, test, val)
+
+    for labels in ctrain + ctest + cval:
+        assert np.issubdtype(labels.dtype, np.floating)
 
 
 # ----------------------------------------------------------
@@ -989,6 +1014,57 @@ def test_calculate_transformation_params_n_subset_value(n_subset):
             n_subset=n_subset,
         )
 
+
+def test_calculate_transformation_params_n_subset_equal_to_number_of_images(
+    tmp_path,
+):
+    file = tmp_path / "data.h5"
+
+    images = np.array(
+        [
+            np.zeros((2, 2)),
+            np.full((2, 2), ADC_MAX),
+        ],
+        dtype=np.uint16,
+    )
+
+    create_h5_file(file, images)
+
+    mean, std = calculate_transformation_params(
+        [file],
+        [np.array([0, 1])],
+        n_subset=2,
+    )
+
+    assert np.isclose(mean, 0.5)
+    assert np.isclose(std, 0.5)
+
+
+def test_calculate_transformation_params_n_subset_larger_than_dataset(
+    tmp_path,
+):
+    file = tmp_path / "data.h5"
+
+    images = np.array(
+        [
+            np.zeros((2, 2)),
+            np.full((2, 2), ADC_MAX),
+        ],
+        dtype=np.uint16,
+    )
+
+    create_h5_file(file, images)
+
+    mean, std = calculate_transformation_params(
+        [file],
+        [np.array([0, 1])],
+        n_subset=100,
+    )
+
+    assert np.isclose(mean, 0.5)
+    assert np.isclose(std, 0.5)
+
+
 # ==========================================================
 # Test MyDataset
 # ==========================================================
@@ -1253,8 +1329,8 @@ def test_my_dataset_initializes_h5_handles_as_none(tmp_path):
         [np.array([0, 1])],
     )
 
-    assert dataset._h5_files == [None]
-    assert dataset._datasets == [None]
+    assert dataset._h5_files == {}
+    assert dataset._datasets == {}
 
 
 def test_my_dataset_len_with_multiple_files(tmp_path):
@@ -1311,11 +1387,11 @@ def test_my_dataset_get_dataset_opens_file_lazily(tmp_path):
     )
 
     # File should not be opened during initialization.
-    assert dataset._h5_files[0] is None
-    assert dataset._datasets[0] is None
 
     dset = dataset._get_dataset(0)
 
+    assert 0 in dataset._h5_files
+    assert 0 in dataset._datasets
     assert dataset._h5_files[0] is not None
     assert dataset._datasets[0] is not None
     assert dset is dataset._datasets[0]
@@ -1358,7 +1434,7 @@ def test_my_dataset_get_dataset_missing_images_raises_key_error(tmp_path):
         dataset._get_dataset(0)
 
 
-def test_my_dataset_getitem_returns_tensor(tmp_path):
+def test_my_dataset_getitem_returns_image_and_label(tmp_path):
     file = tmp_path / "data.h5"
 
     images = np.array(
@@ -1375,9 +1451,10 @@ def test_my_dataset_getitem_returns_tensor(tmp_path):
         [np.array([0])],
     )
 
-    result = dataset[0]
+    image, label = dataset[0]
 
-    assert isinstance(result, torch.Tensor)
+    assert isinstance(image, torch.Tensor)
+    assert isinstance(label, torch.Tensor)
 
 
 def test_my_dataset_getitem_returns_float32(tmp_path):
@@ -1397,9 +1474,10 @@ def test_my_dataset_getitem_returns_float32(tmp_path):
         [np.array([0])],
     )
 
-    result = dataset[0]
+    image, label = dataset[0]
 
-    assert result.dtype == torch.float32
+    assert image.dtype == torch.float32
+    assert label.dtype == torch.long
 
 
 def test_my_dataset_getitem_adds_channel_dimension(tmp_path):
@@ -1417,9 +1495,9 @@ def test_my_dataset_getitem_adds_channel_dimension(tmp_path):
         [np.array([0])],
     )
 
-    result = dataset[0]
+    image, _ = dataset[0]
 
-    assert result.shape == (1, 10, 20)
+    assert image.shape == (1, 10, 20)
 
 
 def test_my_dataset_getitem_normalizes_by_adc_max(tmp_path):
@@ -1442,7 +1520,7 @@ def test_my_dataset_getitem_normalizes_by_adc_max(tmp_path):
         [np.array([0])],
     )
 
-    result = dataset[0]
+    result, label = dataset[0]
 
     expected = torch.tensor(
         [
@@ -1458,6 +1536,7 @@ def test_my_dataset_getitem_normalizes_by_adc_max(tmp_path):
     )
 
     assert torch.allclose(result, expected)
+    assert label.item() == 0
 
 
 def test_my_dataset_getitem_returns_correct_sample_from_multiple_samples(
@@ -1479,8 +1558,8 @@ def test_my_dataset_getitem_returns_correct_sample_from_multiple_samples(
         [np.array([0, 1])],
     )
 
-    first = dataset[0]
-    second = dataset[1]
+    first, first_label = dataset[0]
+    second, second_label = dataset[1]
 
     assert torch.allclose(
         first,
@@ -1491,6 +1570,9 @@ def test_my_dataset_getitem_returns_correct_sample_from_multiple_samples(
         second,
         torch.ones((1, 2, 2)),
     )
+
+    assert first_label.item() == 0
+    assert second_label.item() == 0
 
 
 def test_my_dataset_getitem_works_with_multiple_files(tmp_path):
@@ -1519,8 +1601,8 @@ def test_my_dataset_getitem_works_with_multiple_files(tmp_path):
         ],
     )
 
-    first = dataset[0]
-    second = dataset[1]
+    first, first_label = dataset[0]
+    second, second_label = dataset[1]
 
     assert torch.allclose(
         first,
@@ -1531,6 +1613,9 @@ def test_my_dataset_getitem_works_with_multiple_files(tmp_path):
         second,
         torch.ones((1, 2, 2)),
     )
+
+    assert first_label.item() == 0
+    assert second_label.item() == 1
 
 
 def test_my_dataset_getitem_applies_transform(tmp_path):
@@ -1552,7 +1637,7 @@ def test_my_dataset_getitem_applies_transform(tmp_path):
         transform=transform,
     )
 
-    result = dataset[0]
+    result, label = dataset[0]
 
     expected = torch.full(
         (1, 2, 2),
@@ -1561,6 +1646,7 @@ def test_my_dataset_getitem_applies_transform(tmp_path):
     )
 
     assert torch.allclose(result, expected)
+    assert label.item() == 0
 
 
 def test_my_dataset_transform_is_called_after_normalization(tmp_path):
@@ -1630,12 +1716,14 @@ def test_my_dataset_getitem_negative_sample_index_follows_python_sequence_semant
         [np.array([0, 1])],
     )
 
-    result = dataset[-1]
+    result, label = dataset[-1]
 
     assert torch.allclose(
         result,
         torch.ones((1, 2, 2)),
     )
+
+    assert label.item() == 0
 
 
 def test_my_dataset_getitem_image_index_out_of_bounds_raises(tmp_path):
@@ -1653,3 +1741,128 @@ def test_my_dataset_getitem_image_index_out_of_bounds_raises(tmp_path):
 
     with pytest.raises(IndexError):
         dataset[0]
+
+
+def test_my_dataset_getitem_returns_correct_label_for_multiple_files(tmp_path):
+    file1 = tmp_path / "class0.h5"
+    file2 = tmp_path / "class1.h5"
+
+    create_h5_file(
+        file1,
+        np.zeros((1, 2, 2), dtype=np.uint16),
+    )
+
+    create_h5_file(
+        file2,
+        np.zeros((1, 2, 2), dtype=np.uint16),
+    )
+
+    dataset = MyDataset(
+        [file1, file2],
+        [
+            np.array([0]),
+            np.array([0]),
+        ],
+    )
+
+    _, label0 = dataset[0]
+    _, label1 = dataset[1]
+
+    assert label0.dtype == torch.long
+    assert label1.dtype == torch.long
+    assert label0.item() == 0
+    assert label1.item() == 1
+
+
+def test_my_dataset_close_closes_open_h5_files(tmp_path):
+    file = tmp_path / "data.h5"
+
+    create_h5_file(
+        file,
+        np.zeros((1, 2, 2), dtype=np.uint16),
+    )
+
+    dataset = MyDataset(
+        [file],
+        [np.array([0])],
+    )
+
+    dataset[0]
+
+    h5_file = dataset._h5_files[0]
+    assert h5_file.id.valid
+
+    dataset.close()
+
+    assert not h5_file.id.valid
+
+
+def test_my_dataset_can_reopen_file_after_close(tmp_path):
+    file = tmp_path / "data.h5"
+
+    create_h5_file(
+        file,
+        np.zeros((1, 2, 2), dtype=np.uint16),
+    )
+
+    dataset = MyDataset(
+        [file],
+        [np.array([0])],
+    )
+
+    image1, label1 = dataset[0]
+    first_handle = dataset._h5_files[0]
+
+    dataset.close()
+
+    assert not first_handle.id.valid
+    assert dataset._h5_files == {}
+    assert dataset._datasets == {}
+
+    image2, label2 = dataset[0]
+    second_handle = dataset._h5_files[0]
+
+    assert second_handle.id.valid
+    assert second_handle is not first_handle
+    assert torch.equal(image1, image2)
+    assert torch.equal(label1, label2)
+
+
+# ==========================================================
+# Test worker_init_fn
+# ==========================================================
+
+def test_worker_init_fn_does_nothing_without_worker(monkeypatch):
+    dataset = object()
+
+    worker_info = None
+
+    monkeypatch.setattr(
+        "training.datasets.torch.utils.data.get_worker_info",
+        lambda: worker_info,
+    )
+
+    # The function should simply return.
+    assert worker_init_fn(0) is None
+
+
+def test_worker_init_fn_resets_h5_handles(monkeypatch):
+    dataset = MyDataset.__new__(MyDataset)
+    dataset._datasets = {0: "old_dataset"}
+    dataset._h5_files = {0: "old_file"}
+
+    class WorkerInfo:
+        pass
+
+    worker_info = WorkerInfo()
+    worker_info.dataset = dataset
+
+    monkeypatch.setattr(
+        "training.datasets.torch.utils.data.get_worker_info",
+        lambda: worker_info,
+    )
+
+    worker_init_fn(0)
+
+    assert dataset._datasets == {}
+    assert dataset._h5_files == {}
