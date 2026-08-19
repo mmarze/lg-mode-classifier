@@ -42,5 +42,4 @@ tests/lgbea,/.DS_Store
 .DS_Store
 
 # Temporal
-notebooks
 models/cnn.py
