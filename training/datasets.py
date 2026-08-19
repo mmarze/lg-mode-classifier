@@ -1,5 +1,5 @@
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader, get_worker_info
 import h5py
 import numpy as np
 from pathlib import Path
@@ -463,9 +463,11 @@ class MyDataset(Dataset):
 
     Returns
     -------
-    torch.Tensor
-        A single image with shape ``(1, H, W)`` after scaling and the
-        optional transformation.
+    tuple[torch.Tensor, torch.Tensor]
+        A tuple ``(image, label)`` where ``image`` has shape
+        ``(1, H, W)`` and dtype ``torch.float32``, and ``label``
+        is a scalar tensor with dtype ``torch.long`` representing
+        the file/class index.
 
     Raises
     ------
@@ -543,6 +545,7 @@ class MyDataset(Dataset):
         # ---------- Store data ----------
 
         self.files = [Path(file) for file in files]
+        self.indices = indices
         self.transform = transform
 
         # Flatten (file, image_index) pairs into one list.
@@ -555,8 +558,8 @@ class MyDataset(Dataset):
         if not self.samples:
             raise ValueError("No images selected.")
 
-        self._h5_files = [None] * len(self.files)
-        self._datasets = [None] * len(self.files)
+        self._datasets = {}
+        self._h5_files = {}
 
 
     def __len__(self):
@@ -564,7 +567,8 @@ class MyDataset(Dataset):
 
 
     def _get_dataset(self, file_id):
-        if self._datasets[file_id] is None:
+
+        if file_id not in self._datasets:
             h5_file = h5py.File(self.files[file_id], "r")
 
             if "images" not in h5_file:
@@ -595,4 +599,32 @@ class MyDataset(Dataset):
         if self.transform is not None:
             image = self.transform(image)
 
-        return image
+        label = torch.tensor(
+            file_id,
+            dtype=torch.long,
+        )
+
+        return image, label.to(dtype=torch.long)
+
+    def close(self):
+        if self._h5_files is not None:
+            for file in self._h5_files.values():
+                file.close()
+
+        self._h5_files = {}
+        self._datasets = {}
+
+# ==========================================================
+# Worker_init_fn
+# ==========================================================
+
+def worker_init_fn(worker_id):
+    worker_info = torch.utils.data.get_worker_info()
+
+    if worker_info is None:
+        return
+
+    dataset = worker_info.dataset
+
+    dataset._datasets = {}
+    dataset._h5_files = {}
