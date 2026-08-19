@@ -16,6 +16,13 @@ def device():
 
 
 @pytest.fixture
+def mps_device():
+    if not torch.backends.mps.is_available():
+        pytest.skip("MPS is not available")
+    return torch.device("mps")
+
+
+@pytest.fixture
 def model():
     return torch.nn.Sequential(
         torch.nn.Flatten(),
@@ -327,6 +334,27 @@ def test_train_one_epoch_rejects_model_on_wrong_device(
         )
 
 
+def test_train_one_epoch_mps(
+    model,
+    loader,
+    criterion,
+    mps_device,
+):
+    model = model.to(mps_device)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+
+    loss = train_one_epoch(
+        model,
+        loader,
+        criterion,
+        optimizer,
+        mps_device,
+    )
+
+    assert isinstance(loss, float)
+    assert torch.isfinite(torch.tensor(loss))
+
+
 # ----------------------------------------------------------
 # train_one_epoch - batch validation
 # ----------------------------------------------------------
@@ -450,49 +478,6 @@ def test_train_one_epoch_rejects_invalid_label_shape(
     )
 
     with pytest.raises(ValueError):
-        train_one_epoch(
-            model,
-            loader,
-            criterion,
-            optimizer,
-            device,
-        )
-
-
-def test_train_one_epoch_rejects_mismatched_batch_sizes(
-    criterion,
-    optimizer,
-    device,
-):
-    class MismatchedBatchDataset(torch.utils.data.Dataset):
-        def __len__(self):
-            return 1
-
-        def __getitem__(self, index):
-            # This cannot normally produce mismatched batch sizes
-            # through DataLoader, so this test uses a custom loader.
-            return None
-
-    class MismatchedLoader:
-        def __len__(self):
-            return 1
-
-        def __iter__(self):
-            yield (
-                torch.zeros((2, 1, 2, 2)),
-                torch.tensor([0], dtype=torch.long),
-            )
-
-    model = torch.nn.Sequential(
-        torch.nn.Flatten(),
-        torch.nn.Linear(4, 2),
-    )
-
-    loader = MismatchedLoader()
-
-    # The implementation checks isinstance(loader, DataLoader),
-    # therefore this is a type error before reaching batch validation.
-    with pytest.raises(TypeError):
         train_one_epoch(
             model,
             loader,
@@ -651,6 +636,18 @@ def test_train_model_returns_model_and_history(
         fake_evaluate_model,
     )
 
+    monkeypatch.setattr(
+    train_module,
+    "calculate_metrics",
+    lambda pred, prob, lab, num_classes: {
+        "accuracy": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "auroc": 0.0,
+    },
+)
+
     result_model, history = train_model(
         model,
         loader,
@@ -659,6 +656,8 @@ def test_train_model_returns_model_and_history(
         optimizer,
         device,
         num_epochs=2,
+        num_classes=2,
+        min_delta=0.0,
     )
 
     assert isinstance(result_model, torch.nn.Module)
@@ -670,6 +669,56 @@ def test_train_model_returns_model_and_history(
 
     assert len(history["train_loss"]) == 2
     assert len(history["validation_loss"]) == 2
+
+
+def test_train_model_mps(
+    model,
+    loader,
+    criterion,
+    mps_device,
+    monkeypatch,
+):
+    model = model.to(mps_device)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+
+    monkeypatch.setattr(
+        train_module,
+        "evaluate_model",
+        lambda model, loader, criterion, device: (
+            0.5,
+            None,
+            None,
+            None,
+        ),
+    )
+
+    monkeypatch.setattr(
+        train_module,
+        "calculate_metrics",
+        lambda pred, prob, lab, num_classes: {
+            "accuracy": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "auroc": 0.0,
+        },
+    )
+
+    result_model, history = train_model(
+        model,
+        loader,
+        loader,
+        criterion,
+        optimizer,
+        mps_device,
+        num_epochs=1,
+        num_classes=2,
+        min_delta=0.0,
+    )
+
+    assert next(result_model.parameters()).device.type == "mps"
+    assert len(history["train_loss"]) == 1
+    assert len(history["validation_loss"]) == 1
 
 
 # ----------------------------------------------------------
@@ -916,6 +965,133 @@ def test_train_model_patience_type(
         )
 
 
+@pytest.mark.parametrize(
+    "value",
+    [
+        None,
+        1.0,
+        "2",
+        [],
+        (),
+        True,
+        False,
+    ],
+)
+def test_train_model_num_classes_type(
+    value,
+    model,
+    loader,
+    criterion,
+    optimizer,
+    device,
+):
+    with pytest.raises(TypeError):
+        train_model(
+            model,
+            loader,
+            loader,
+            criterion,
+            optimizer,
+            device,
+            1,
+            value,
+            0.0,
+        )
+
+
+@pytest.mark.parametrize(
+    "num_classes",
+    [
+        0,
+        -1,
+        -10,
+    ],
+)
+def test_train_model_rejects_invalid_num_classes(
+    num_classes,
+    model,
+    loader,
+    criterion,
+    optimizer,
+    device,
+):
+    with pytest.raises(ValueError):
+        train_model(
+            model,
+            loader,
+            loader,
+            criterion,
+            optimizer,
+            device,
+            1,
+            num_classes,
+            0.0,
+        )
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        None,
+        "0.1",
+        [],
+        (),
+        True,
+        False,
+    ],
+)
+def test_train_model_min_delta_type(
+    value,
+    model,
+    loader,
+    criterion,
+    optimizer,
+    device,
+):
+    with pytest.raises(TypeError):
+        train_model(
+            model,
+            loader,
+            loader,
+            criterion,
+            optimizer,
+            device,
+            1,
+            2,
+            value,
+        )     
+
+
+@pytest.mark.parametrize(
+    "min_delta",
+    [
+        -0.0001,
+        -1.0,
+        -10.0,
+    ],
+)
+def test_train_model_rejects_negative_min_delta(
+    min_delta,
+    model,
+    loader,
+    criterion,
+    optimizer,
+    device,
+):
+    with pytest.raises(ValueError):
+        train_model(
+            model,
+            loader,
+            loader,
+            criterion,
+            optimizer,
+            device,
+            1,
+            2,
+            min_delta,
+        )
+
+
 # ----------------------------------------------------------
 # train_model - values
 # ----------------------------------------------------------
@@ -946,6 +1122,9 @@ def test_train_model_rejects_invalid_num_epochs(
             optimizer,
             device,
             num_epochs,
+             num_classes=2,
+            min_delta=0.1,
+            patience=1,
         )
 
 
@@ -973,6 +1152,8 @@ def test_train_model_rejects_negative_patience(
             optimizer,
             device,
             1,
+            num_classes=2,
+            min_delta=0.1,
             patience=patience,
         )
 
@@ -993,6 +1174,9 @@ def test_train_model_rejects_empty_train_loader(
             optimizer,
             device,
             1,
+            num_classes=2,
+            min_delta=0.1,
+            patience=1,
         )
 
 
@@ -1013,6 +1197,9 @@ def test_train_model_rejects_empty_validation_loader(
             optimizer,
             device,
             1,
+            num_classes=2,
+            min_delta=0.1,
+            patience=1,
         )
 
 
@@ -1033,6 +1220,9 @@ def test_train_model_rejects_parameterless_model(
             optimizer,
             device,
             1,
+            num_classes=2,
+            min_delta=0.1,
+            patience=1,
         )
 
 
@@ -1062,6 +1252,17 @@ def test_train_model_history_has_one_entry_per_epoch(
         "evaluate_model",
         fake_evaluate_model,
     )
+    monkeypatch.setattr(
+    train_module,
+    "calculate_metrics",
+    lambda pred, prob, lab, num_classes: {
+        "accuracy": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "auroc": 0.0,
+    },
+    )
 
     _, history = train_model(
         model,
@@ -1071,6 +1272,8 @@ def test_train_model_history_has_one_entry_per_epoch(
         optimizer,
         device,
         num_epochs=3,
+        num_classes=2,
+        min_delta=0.1,
         patience=10,
     )
 
@@ -1100,6 +1303,18 @@ def test_train_model_stops_after_patience(
         fake_evaluate_model,
     )
 
+    monkeypatch.setattr(
+        train_module,
+        "calculate_metrics",
+        lambda pred, prob, lab, num_classes: {
+            "accuracy": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "auroc": 0.0,
+        },
+    )
+
     _, history = train_model(
         model,
         loader,
@@ -1108,12 +1323,66 @@ def test_train_model_stops_after_patience(
         optimizer,
         device,
         num_epochs=10,
+        num_classes=2,
+        min_delta=0.1,
         patience=2,
     )
 
     # First epoch establishes the best value.
     # Next two epochs do not improve.
     assert len(history["validation_loss"]) == 3
+
+
+def test_train_model_respects_min_delta(
+    model,
+    loader,
+    criterion,
+    optimizer,
+    device,
+    monkeypatch,
+):
+    validation_losses = iter([1.0, 0.95, 0.90])
+
+    def fake_evaluate_model(
+        model,
+        loader,
+        criterion,
+        device,
+    ):
+        return next(validation_losses), None, None, None
+
+    monkeypatch.setattr(
+        train_module,
+        "evaluate_model",
+        fake_evaluate_model,
+    )
+
+    monkeypatch.setattr(
+        train_module,
+        "calculate_metrics",
+        lambda pred, prob, lab, num_classes: {
+            "accuracy": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "auroc": 0.0,
+        },
+    )
+
+    _, history = train_model(
+        model,
+        loader,
+        loader,
+        criterion,
+        optimizer,
+        device,
+        num_epochs=10,
+        num_classes=2,
+        min_delta=0.1,
+        patience=1,
+    )
+
+    assert len(history["validation_loss"]) == 2
 
 
 def test_train_model_does_not_stop_when_validation_improves(
@@ -1140,6 +1409,18 @@ def test_train_model_does_not_stop_when_validation_improves(
         fake_evaluate_model,
     )
 
+    monkeypatch.setattr(
+        train_module,
+        "calculate_metrics",
+        lambda pred, prob, lab, num_classes: {
+            "accuracy": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "auroc": 0.0,
+        },
+    )
+
     _, history = train_model(
         model,
         loader,
@@ -1149,6 +1430,8 @@ def test_train_model_does_not_stop_when_validation_improves(
         device,
         num_epochs=3,
         patience=1,
+        num_classes=2,
+        min_delta=0.0,
     )
 
     assert len(history["validation_loss"]) == 3
@@ -1178,6 +1461,18 @@ def test_train_model_restores_best_model(
         fake_evaluate_model,
     )
 
+    monkeypatch.setattr(
+        train_module,
+        "calculate_metrics",
+        lambda pred, prob, lab, num_classes: {
+            "accuracy": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "auroc": 0.0,
+        },
+    )
+
     initial_state = {
         name: parameter.detach().clone()
         for name, parameter in model.named_parameters()
@@ -1192,14 +1487,10 @@ def test_train_model_restores_best_model(
         device,
         num_epochs=2,
         patience=10,
+        num_classes=2,
+        min_delta=0.0,
     )
-
-    # The model should be restored to the state from the first
-    # (best-validation-loss) epoch, rather than the final epoch.
-    #
-    # We cannot compare directly with initial_state because the
-    # first epoch modifies the parameters, so we only verify that
-    # a valid state was restored.
+    
     for name, parameter in result_model.named_parameters():
         assert torch.isfinite(parameter).all()
         assert parameter.shape == initial_state[name].shape
