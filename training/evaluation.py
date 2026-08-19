@@ -72,7 +72,7 @@ def evaluate_model(
 
     model_device = next(model.parameters()).device
 
-    if model_device != device:
+    if model_device.type != device.type:
         raise ValueError(
             f"Model is on {model_device}, but device is {device}"
         )
