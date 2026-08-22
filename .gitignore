@@ -40,6 +40,3 @@ tests/.DS_Store
 tests/dataset/.DS_Store
 tests/lgbea,/.DS_Store
 .DS_Store
-
-# Temporal
-models/cnn.py
