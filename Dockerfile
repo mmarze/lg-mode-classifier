@@ -6,6 +6,7 @@ COPY pyproject.toml .
 
 COPY src/ src/
 COPY examples/ examples/
+COPY models/ models/
 
 RUN pip install --no-cache-dir .
 
