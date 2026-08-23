@@ -55,29 +55,28 @@ class CNN(nn.Module):
         self.n_classes = n_classes
 
         self.features = nn.Sequential(
-            nn.Conv2d(1, 32, kernel_size=(3,3), padding=1),
-            nn.BatchNorm2d(32),
+            nn.Conv2d(1, 16, 3, stride=2, padding=1),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=(2,2)),
 
-            nn.Conv2d(32, 64, kernel_size=(3,3), padding=1),
-            nn.BatchNorm2d(64),
+            nn.Conv2d(16, 32, 3, padding=1),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=(2,2)),
+            nn.MaxPool2d(2),
+
+            nn.Conv2d(32, 64, 3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(2),
 
             nn.Conv2d(64, 128, kernel_size=(3,3), padding=1),
-            nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=(2,2)),
 
             nn.Conv2d(128, 256, kernel_size=(3,3), padding=1),
-            nn.BatchNorm2d(256),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=(2,2)),
         )
 
         self.classifier = nn.Sequential(
-            nn.AdaptiveAvgPool2d((1, 1)),
+            nn.AdaptiveAvgPool2d(1),
             nn.Flatten(),
             nn.Linear(256, n_classes)
         )
