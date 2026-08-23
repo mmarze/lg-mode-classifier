@@ -131,8 +131,8 @@ def test_get_indices_for_output_with_val():
     ind_train, ind_test, ind_val = get_indices(ratios, N)
 
     assert len(ind_train) == int(N * ratios[0])
-    assert len(ind_test) == int(N * ratios[1])
-    assert len(ind_val) == N - len(ind_train) - len(ind_test)
+    assert len(ind_val) == int(N * ratios[1])
+    assert len(ind_test) == N - len(ind_train) - len(ind_val)
 
 
 def test_get_indices_returns_numpy_arrays():
@@ -170,8 +170,8 @@ def test_get_indices_with_no_validation():
     train, test, val = get_indices((0.9, 0.1), 100)
 
     assert len(train) == 90
-    assert len(test) == 10
-    assert len(val) == 0
+    assert len(test) == 0
+    assert len(val) == 10
     assert isinstance(val, np.ndarray)
 
 
@@ -179,8 +179,8 @@ def test_get_indices_allows_train_test_sum_equal_to_one():
     train, test, val = get_indices((0.8, 0.2), 100)
 
     assert len(train) == 80
-    assert len(test) == 20
-    assert len(val) == 0
+    assert len(test) == 0
+    assert len(val) == 20
 
 
 # ==========================================================
