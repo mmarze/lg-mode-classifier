@@ -21,9 +21,9 @@ def get_indices(ratios: tuple, N=10000):
     Parameters
     ----------
     ratios : tuple of floats
-        The tuple with split ratio: (percentage_train, percentage_test).
-        The percentage for validation dataset is caluclated based on _percentage_train_
-        and _percentage_test_.
+        The tuple with split ratio: (percentage_train, percentage_validation).
+        The percentage for test dataset is caluclated based on _percentage_train_
+        and _percentage_validation_.
     N : int
         The number of elements in the dataset.
     
@@ -33,7 +33,7 @@ def get_indices(ratios: tuple, N=10000):
         Indices for train dataset.
     indices_test: np.ndarray
         Indices for test dataset.
-    indices_validate:  np.ndarray
+    indices_validation:  np.ndarray
         Indices for validation dataset.
 
     Raises
@@ -42,10 +42,10 @@ def get_indices(ratios: tuple, N=10000):
         If ratios is not a tuple of floats.
         If N is not an integer.
     ValueError
-        If percentage_train <= 0 or percentage_test <= 0.
+        If percentage_train <= 0 or percentage_validation <= 0.
         If percentage_train > 1.
-        If percentage_test >= 1.
-        If percentage_train + percentage_test > 1.
+        If percentage_validation >= 1.
+        If percentage_train + percentage_validation > 1.
         If N <= 0.
     """
     # ---------- Type checking ----------
@@ -78,7 +78,7 @@ def get_indices(ratios: tuple, N=10000):
     if not np.isfinite(N):
         raise ValueError("Number of elemnets in dataset must be finite.")
 
-    train, test = ratios
+    train, validation = ratios
 
     if train <= 0:
         raise ValueError("Split ratio for train dataset must be greater than 0.")
@@ -86,13 +86,13 @@ def get_indices(ratios: tuple, N=10000):
     if train > 1:
         raise ValueError("Split ratio for train dataset must be less than or equal to 1.")
 
-    if test <= 0: 
-        raise ValueError("Split ratio for test dataset must be greater than 0.")
+    if validation <= 0: 
+        raise ValueError("Split ratio for validation dataset must be greater than 0.")
 
-    if test >= 1:
-        raise ValueError("Split ratio for test dataset must be less than 1.")
+    if validation >= 1:
+        raise ValueError("Split ratio for validation dataset must be less than 1.")
 
-    if test + train > 1:
+    if validation + train > 1:
         raise ValueError("The sum of split ratios must be less than or equal to 1.")
 
     if N <= 0:
@@ -100,17 +100,17 @@ def get_indices(ratios: tuple, N=10000):
             
     # ---------- Get indices ----------
 
-    N_test = int(test * N)
+    N_validation = int(validation * N)
     N_train = int(train * N)
 
     rng = np.random.default_rng(seed=SEED)
     indices = rng.permutation(N)
 
-    indices_test = indices[:N_test]
-    indices_train = indices[N_test:N_test + N_train]
-    indices_validate = indices[N_test + N_train:]
+    indices_validation = indices[:N_validation]
+    indices_train = indices[N_validation:N_validation + N_train]
+    indices_test = indices[N_validation + N_train:]
 
-    return (indices_train, indices_test, indices_validate)
+    return (indices_train, indices_test, indices_validation)
 
 
 # ==========================================================
