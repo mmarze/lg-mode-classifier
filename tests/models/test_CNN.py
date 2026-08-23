@@ -58,14 +58,14 @@ class TestCNNArchitecture:
 
         assert isinstance(first_conv, nn.Conv2d)
         assert first_conv.in_channels == 1
-        assert first_conv.out_channels == 32
+        assert first_conv.out_channels == 16
         assert first_conv.kernel_size == (3, 3)
         assert first_conv.padding == (1, 1)
 
     def test_last_convolution(self):
         model = CNN(6)
 
-        last_conv = model.features[12]
+        last_conv = model.features[11]
 
         assert isinstance(last_conv, nn.Conv2d)
         assert last_conv.in_channels == 128
@@ -142,4 +142,4 @@ class TestCNNForward:
 
         features = model.features(x)
 
-        assert features.shape == (2, 256, 31, 32)
+        assert features.shape == (2, 256, 15, 16)
