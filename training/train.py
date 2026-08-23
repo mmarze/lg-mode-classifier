@@ -340,6 +340,9 @@ def train_model(
 
     epochs_without_improvement = 0
 
+    best_epoch = 0
+    best_val_accuracy = 0.0
+
     for epoch in range(num_epochs):
 
         epoch_start = time.time()
@@ -391,7 +394,9 @@ def train_model(
         if best_val_loss - val_loss > min_delta:
 
             best_val_loss = val_loss
+            best_epoch = epoch + 1
             epochs_without_improvement = 0
+            best_val_accuracy = metrics["accuracy"]
 
             # Save a copy of the best model parameters
             best_model_state = copy.deepcopy(
@@ -411,6 +416,10 @@ def train_model(
 
             break
 
+    history["best_epoch"] = best_epoch
+    history["best_val_loss"] = best_val_loss
+    history["best_val_accuracy"] = best_val_accuracy
+    
     # Restore best model
     model.load_state_dict(best_model_state)
 
