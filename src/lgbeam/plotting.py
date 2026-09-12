@@ -193,6 +193,124 @@ def plot_phase(field: np.ndarray, title="Phase", cmap="inferno",
     return fig, ax
 
 
+def plot_intensity_phase(field: np.ndarray, title1="Intensity", title2="Phase", cmap="inferno", 
+                   dx: int | float | None = None, dy: int | float | None = None):
+    """
+    Plot the intensity and phase of a complex electric field.
+
+    Parameters
+    ----------
+    field : np.ndarray
+        Complex electric-field amplitude.
+    title1 : str
+        Plot title for intensity subplot (default: "Intensity").
+    title2 : str
+        Plot title for phase subplot (default: "Phase").
+    cmap : str
+        Matplotlib colormap (default: inferno).
+    dx : int or float
+        X pixel size in meters. If not provided, the axis is in pixels. Musy be positive.
+    dy : int or float
+        Y pixel size in meters. If not provided, the axis is in pixels. Must be positive.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        The created Matplotlib figure.
+    ax : matplotlib.axes.Axes
+        The Matplotlib axes containing the plotted intensity.
+    """
+
+    # ---------- Type checking ----------
+    if not isinstance(field, np.ndarray):
+        raise TypeError(
+            f"field must be an np.ndarray, got {type(field).__name__}."
+        )
+
+    if not isinstance(title1, (str,type(None))):
+        raise TypeError(
+            f"title must be a string, got {type(title1).__name__}."
+        )
+
+    if not isinstance(title2, (str,type(None))):
+        raise TypeError(
+            f"title must be a string, got {type(title2).__name__}."
+        )
+
+    if not isinstance(cmap, (str, type(None))):
+        raise TypeError(
+            f"cmap must be a string, got {type(cmap).__name__}."
+        )
+
+    if not isinstance(dx, (int, float, np.integer, np.floating, type(None))):
+        raise TypeError(
+            f"dx must be a real number, got {type(dx).__name__}."
+        )
+
+    if not isinstance(dy, (int, float, np.integer, np.floating, type(None))):
+        raise TypeError(
+            f"dy must be a real number, got {type(dy).__name__}."
+        )
+
+    # ---------- Value checking ----------
+    if not np.all(np.isfinite(field)):
+        raise ValueError("field must be finite.")
+
+    if dx is not None and not np.isfinite(dx):
+        raise ValueError("dx must be finite.")
+
+    if dy is not None and not np.isfinite(dy):
+        raise ValueError("dy must be finite.")
+
+    if dx is not None and dx <= 0:
+        raise ValueError("dx must be positive.")
+
+    if dy is not None and dy <= 0:
+        raise ValueError("dy must be positive.")
+
+    # ---------- Plot ----------
+
+    intensity = np.abs(field)**2
+    phase = np.angle(field)
+
+    fig, ax = plt.subplots(1, 2, figsize=(12, 5))
+
+    if dx is not None and dy is not None:
+        ny, nx = intensity.shape
+        extent = [- nx * dx / 2, nx * dx / 2, - ny * dy / 2, ny * dy / 2]
+        im1 = ax[0].imshow(intensity, cmap=cmap, extent=extent)
+        ax[0].set_xlabel("X")
+        ax[0].set_ylabel("Y")
+        ax[0].xaxis.set_major_formatter(EngFormatter(unit="m"))
+        ax[0].yaxis.set_major_formatter(EngFormatter(unit="m"))
+        ax[0].tick_params(axis='x', labelrotation=45)
+        ax[0].set_title(title1)
+
+        im2 = ax[1].imshow(phase, cmap=cmap, extent=extent)
+        ax[1].set_xlabel("X")
+        ax[1].set_ylabel("Y")
+        ax[1].xaxis.set_major_formatter(EngFormatter(unit="m"))
+        ax[1].yaxis.set_major_formatter(EngFormatter(unit="m"))
+        ax[1].tick_params(axis='x', labelrotation=45)
+        
+    else:
+        im1 = ax[0].imshow(intensity, cmap=cmap)
+        ax[0].set_xlabel("X pixel")
+        ax[0].set_ylabel("Y pixel")
+        ax[0].set_title(title1)
+
+        im2 = ax[1].imshow(phase, cmap=cmap)
+        ax[1].set_xlabel("X pixel")
+        ax[1].set_ylabel("Y pixel")
+        ax[1].set_title(title2)
+
+    fig.colorbar(im1, label="Intensity $|U|^2$")
+    fig.colorbar(im2, label="Phase [rad]")
+    plt.tight_layout()
+
+    return fig, ax
+
+
 def plot_complex(field: np.ndarray, title="Complex field", cmap="RdBu",
                dx: int | float | None = None, dy: int | float | None = None):
     """
