@@ -27,7 +27,7 @@ jobs:
           pip install sphinx furo
 
       - name: Build documentation
-        run: sphinx-build -b html docs/source docs/build/html
+        run: sphinx-build -b html docs/lgbeam/source docs/build/html
 
       - name: Upload documentation
         uses: actions/upload-pages-artifact@v3
