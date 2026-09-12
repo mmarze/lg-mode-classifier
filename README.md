@@ -1,57 +1,354 @@
 # Laguerre-Gaussian Mode Classifier
 
-A project for **generation and classification of Laguerre-Gaussian (LG) optical modes**.
+**Generation, simulation and neural-network classification of Laguerre-Gaussian optical modes.**
 
-The project is divided into two main parts:
+This project provides a Python library for generating and manipulating Laguerre-Gaussian (LG) beams together with neural-network models for automatic identification of LG modes from their intensity distributions.
 
-1. **`lgbeam`** — a Python library for generating and manipulating Laguerre-Gaussian beams.
-2. **Neural network classifier** — a deep learning model for identifying LG modes from their intensity distributions. This part of the project is currently **work in progress**.
+The project combines computational optics with deep learning:
 
-> **Status:** 🚧 Work in progress
+```text
+              Laguerre-Gaussian modes
+                       │
+                       ▼
+                 ┌──────────┐
+                 │  lgbeam  │
+                 └────┬─────┘
+                      │
+              beam generation
+                      │
+                      ▼
+             simulated intensity
+                      │
+                      ▼
+              ┌───────────────┐
+              │   CNN /       │
+              │   ResNet18    │
+              └───────┬───────┘
+                      │
+                      ▼
+                mode (p, l)
+```
+
+## Overview
+
+Laguerre-Gaussian modes form a family of orthogonal solutions of the paraxial wave equation. They are commonly described using two mode indices:
+
+* **`p`** — radial mode index,
+* **`l`** — azimuthal mode index.
+
+The spatial structure of an LG beam depends strongly on these indices, making the modes suitable for automatic recognition using image-based machine-learning methods.
+
+This project implements both sides of the problem:
+
+* generation and numerical manipulation of LG beams,
+* automatic classification of their intensity distributions using neural networks.
 
 ---
 
-## Project overview
+## Gallery
 
-Laguerre-Gaussian modes form a family of orthogonal solutions to the paraxial wave equation. They are commonly described by two mode indices:
+### Laguerre-Gaussian modes
 
-* `p` — radial mode index,
-* `l` — azimuthal mode index.
+*A selection of generated LG modes for different values of `p` and `l`.*
 
-The goal of this project is to provide a convenient computational pipeline for working with these modes:
+<img title="LG modes gallery" src="figures/mode_gallery.png" width=800>
+
+### Phase and intensity
+
+<img title="LG10" src="figures/plot_beam_LG10.png" width=800>
+
+---
+
+# `lgbeam`
+
+`lgbeam` is the optical simulation component of the project. It provides tools for generating Laguerre-Gaussian beams and performing numerical operations on them.
+
+The package currently targets Python 3.10+ and uses NumPy, SciPy and Matplotlib.
+
+### Main functionality
+
+The library supports:
+
+* Laguerre-Gaussian mode generation,
+* optical-field manipulation,
+* beam propagation,
+* generation of mode mixtures,
+* optical vortex generation,
+* visualization of simulated beams.
+
+The repository contains example scripts demonstrating these operations.
+
+### Basic example
+
+```python
+import lgbeam
+
+# Create mesh
+r, phi = lgbeam.mesh.create_mesh(
+    L=1e-3, 
+    N=512
+)
+
+# Laguerre-Gauss beam
+beam = lgbeams.beams.LaguerreGauss(
+    p=0, 
+    l=0, 
+    r=r,
+    phi=phi,
+    z=10e-3,
+    w0=500e-6,
+    wavelength=532e-9,
+    n=1.0
+)
+```
+
+The resulting optical field can then be used for visualization, propagation or dataset generation.
+
+---
+
+## Beam propagation
+
+LG beams can be numerically propagated to investigate how their spatial structure changes along the optical axis. For that, change the axial distance from the beam's focus (waist).
+
+<p align="center">
+  <img src="figures/plot_propagation_-z_R.png" width="23%">
+  <img src="figures/plot_propagation_0.png" width="23%">
+  <img src="figures/plot_propagation_z_R.png" width="23%">
+  <img src="figures/plot_propagation_2z_R.png" width="23%">
+</p>
+
+---
+
+## Mode mixtures
+
+The library can also be used to construct superpositions of LG modes.
+
+<p align="center">
+  <img src="figures/plot_beam_LG00.png" width="46%">
+  <img src="figures/plot_beam_LG02.png" width="46%">
+</p>
+
+<p align="center">
+  <img src="figures/plot_beam_mixed_intensity.png" width="46%">
+  <img src="figures/plot_beam_mixed_phase.png" width="46%">
+</p>
+ 
+---
+
+# Documentation
+
+Documentation for the `lgbeam` package is located in:
+
+```text
+docs/lgbeam/
+```
+
+---
+
+# Neural Network Classification
+
+The second part of the project investigates automatic recognition of Laguerre-Gaussian modes using convolutional neural networks.
+
+The classifier receives an image representation of an optical beam and predicts its corresponding mode indices.
 
 ```text
 Laguerre-Gaussian mode
-        │
-        ▼
-     lgbeam
-        │
-        ├── Generate LG mode
-        ├── Propagate beam
-        └── Create mode mixtures
-        │
-        ▼
-   Intensity / field data
-        │
-        ▼
- Neural Network Classifier
-        │
-        ▼
- Predicted LG mode (p, l)
+         │
+         ▼
+Optical field simulation (lgbeam)
+         │
+         ├── Generate LG mode
+         ├── Propagate beam
+         └── Create mode mixtures
+         │
+         ▼
+Optical field data
+         │
+         ▼
+   Intensity image
+         │
+         ▼
+   Preprocessing
+         │
+         ▼
+┌─────────────────────┐
+│ Neural Network      │
+│                     │
+│  ┌───────────────┐  │
+│  │ CNN           │  │
+│  └───────────────┘  │
+│          or         │
+│  ┌───────────────┐  │
+│  │ ResNet18      │  │
+│  └───────────────┘  │
+└──────────┬──────────┘
+           │
+           ▼
+       predicted
+        (p, l)
 ```
 
-The generated optical fields can be used to create datasets for training and evaluating machine-learning models.
+## Models
+
+Two neural-network architectures are investigated:
+
+### Convolutional Neural Network
+
+A custom CNN is used as a compact baseline model for LG-mode classification.
+
+<img src="figures/CNN_schema.png" width=800>
+
+
+### ResNet18
+
+A ResNet18-based architecture is used as a deeper model for comparison.
+
+Residual connections make ResNet18 a useful reference architecture for evaluating whether a deeper network provides an advantage for this classification task. 
+
+<img src="figures/ResNet_schema.png" width=800>
 
 ---
 
-## Repository structure
+# Dataset Generation
+
+One of the main advantages of the project is that the training data can be generated numerically.
+
+Instead of relying exclusively on experimental measurements, LG modes are simulated using the `lgbeam` library and transformed into training examples.
+
+```text
+          mode indices
+             (p, l)
+                │
+                ▼
+        ┌──────────────┐
+        │ LG generator │
+        └──────┬───────┘
+               │
+               ▼
+        optical field
+               │
+               ▼
+        intensity image
+               │
+               ▼
+        preprocessing
+               │
+               ▼
+          training set
+```
+
+Exemplary data from the dataset
+
+<img src="figures/data_gallery.png" width=800>
+
+
+---
+
+# Training
+
+The neural networks are trained to map the spatial intensity distribution of a beam to its corresponding LG mode.
+
+The classification task can be formulated as:
+
+```text
+I(x, y)  →  neural network  →  (p, l)
+```
+
+where `I(x, y)` represents the measured or simulated intensity distribution.
+
+<img src="figures/training_history.png" width=600>
+
+---
+
+# Results
+
+## Classification accuracy
+
+If several experimental conditions were evaluated, use grouped bars or a table.
+
+| Model    | Accuracy | Precision  | Recall    |  f1-score  | Notes                 |
+| -------- | -------: | ---------: | --------: | ---------: | --------------------- | 
+| CNN      |    0.967 |      0.968 |     0.967 |      0.967 | Baseline              |
+| ResNet18 |      1.0 |        1.0 |       1.0 |        1.0 | Deep residual network |
+
+
+---
+
+## Confusion matrices
+
+
+<p align="center">
+  <img src="figures/CNN_cm.png" width=350>
+  <img src="figures/ResNet18_cm.png" width=350>
+</p>
+
+Left: CNN; Rigth: ResNet18.
+
+The confusion matrices show which LG modes are most frequently confused by the models.
+
+This is particularly relevant for neighboring mode indices, where intensity patterns can become increasingly similar.
+
+---
+
+# Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/mmarze/lg-mode-classifier.git
+cd lg-mode-classifier
+```
+
+Install the package:
+
+```bash
+pip install -e .
+```
+
+The project currently requires Python 3.10 or newer.
+
+---
+
+# Usage
+
+## Generate an LG mode
+
+```python
+import lgbeam
+
+# Create mesh
+r, phi = lgbeam.mesh.create_mesh(
+    L=1e-3, 
+    N=512
+)
+
+# Laguerre-Gauss beam
+beam = lgbeams.beams.LaguerreGauss(
+    p=0, 
+    l=0, 
+    r=r,
+    phi=phi,
+)
+```
+
+Additional examples can be found in:
+
+```text
+examples/lgbeam/
+```
+
+including examples for individual modes, mixtures, propagation and vortices.
+
+---
+
+# Repository Structure
 
 ```text
 lg-mode-classifier/
 │
 ├── src/
 │   └── lgbeam/
-│       └── ...                 # lgbeam library
+│       └── ...                 # LG beam generation library
 │
 ├── examples/
 │   └── lgbeam/
@@ -65,127 +362,23 @@ lg-mode-classifier/
 ├── docs/
 │   └── lgbeam/                 # library documentation
 │
-├── tests/                      # tests
+├── models/                     # trained neural-network models
+├── training/                   # training code
+├── tests/                      # test suite
 │
 ├── Dockerfile
+├── Dockerfile.test
+├── docker-compose.yaml
 ├── pyproject.toml
 ├── LICENSE
 └── README.md
 ```
 
----
-
-# 1. `lgbeam`
-
-`lgbeam` is a Python library for generating **Laguerre-Gaussian optical beams**.
-
-The package is currently version `0.1.0` and requires **Python 3.10+**. Its core dependencies are NumPy, SciPy and Matplotlib.
-
-### Installation
-
-Clone the repository:
-
-```bash
-git clone https://github.com/mmarze/lg-mode-classifier.git
-cd lg-mode-classifier
-```
-
-Install the package in editable mode:
-
-```bash
-pip install -e .
-```
-
-The package can then be imported as:
-
-```python
-import lgbeam
-```
-
-### Features
-
-The library is being developed around several operations relevant to LG beams, including:
-
-* generation of Laguerre-Gaussian modes,
-* beam propagation,
-* generation of mode mixtures,
-* optical vortex generation,
-* visualization of optical fields.
-
-Example scripts for these operations are available in [`examples/lgbeam`](https://github.com/mmarze/lg-mode-classifier/tree/main/examples/lgbeam).
+The repository contains separate components for the optical library, examples, documentation, models, training and tests.
 
 ---
 
-## Example
-
-A simple example of generating an LG mode:
-
-```python
-import lgbeam
-
-# Generate a Laguerre-Gaussian mode
-# Example parameters: radial index p and azimuthal index l
-beam = lgbeam.LG(p=0, l=1)
-```
-
-> **Note:** The API is still under development and may change between versions.
-
----
-
-# 2. Neural Network Classifier
-
-The second part of the project focuses on **automatic classification of Laguerre-Gaussian modes using neural networks**.
-
-The general idea is to use simulated optical fields generated with `lgbeam` as training data for a neural network.
-
-```text
-        lgbeam
-           │
-           ▼
-   Generate LG modes
-           │
-           ▼
-  Generate training data
-           │
-           ▼
-     Neural network
-           │
-           ▼
-     Mode prediction
-           │
-           ▼
-        (p, l)
-```
-
-The classifier is currently **in development**.
-
----
-
-## Scientific motivation
-
-Laguerre-Gaussian beams are important in several areas of modern optics because of their spatial structure and orbital angular momentum.
-
-Reliable identification of LG modes can be useful in applications involving optical communications, optical metrology, mode multiplexing, beam characterization and computational imaging.
-
-Machine-learning-based approaches have also been investigated for the analysis and classification of LG modes, making automated mode recognition an interesting application for this project.
-
----
-
-# Development
-
-This project is currently under active development.
-
-The `lgbeam` library is the more mature component, while the neural-network classifier is being developed on top of it.
-
----
-
-## Testing
-
-Tests for the project are located in:
-
-```text
-tests/
-```
+# Testing
 
 Run the test suite with:
 
@@ -193,19 +386,32 @@ Run the test suite with:
 pytest
 ```
 
----
-
-## Documentation
-
-Documentation for the `lgbeam` package is located in:
+Tests are located in:
 
 ```text
-docs/lgbeam/
+tests/
 ```
 
 ---
 
-## License
+# Scientific Motivation
+
+Laguerre-Gaussian beams are important in modern optics due to their structured spatial profiles and their relation to orbital angular momentum.
+
+Automatic identification of optical modes can be useful in areas such as:
+
+* optical communications,
+* mode multiplexing,
+* optical metrology,
+* beam characterization,
+* computational imaging,
+* structured-light systems.
+
+This project explores how numerical optical simulations and modern image-classification methods can be combined to automate LG-mode identification.
+
+---
+
+# License
 
 This project is released under the **MIT License**.
 
@@ -213,7 +419,7 @@ See [`LICENSE`](LICENSE) for details.
 
 ---
 
-## Author
+# Author
 
 **Marcin Marzejon**
 
@@ -221,12 +427,21 @@ GitHub: [@mmarze](https://github.com/mmarze)
 
 ---
 
-## Project status
+# Citation
 
-🚧 **Work in progress**
+If you use this project in academic work, please cite:
 
-The project is currently evolving, especially the neural-network component. APIs, model architectures, datasets and training procedures may change as development progresses.
+```bibtex
+@software{marzejon_lg_mode_classifier,
+  author = {Marzejon, Marcin},
+  title = {Laguerre-Gaussian Mode Classifier},
+  url = {https://github.com/mmarze/lg-mode-classifier},
+  license = {MIT}
+}
+```
 
-## Tech Stack
+---
+
+# Tech Stack
 
 **Python · NumPy · SciPy · Matplotlib · PyTorch · pytest · Docker · Git**
