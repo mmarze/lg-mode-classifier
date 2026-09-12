@@ -8,6 +8,7 @@ import pytest
 from lgbeam.plotting import (
     plot_intensity,
     plot_phase,
+    plot_intensity_phase,
     plot_complex,
     plot_beam,
 )
@@ -192,3 +193,60 @@ def test_plot_beam_returns_four_axes(field):
 def test_plot_beam_requires_three_colormaps(field):
     with pytest.raises(IndexError):
         plot_beam(field, cmap=["inferno"])
+
+
+
+def test_plot_intensity_phase_returns_two_axes(field):
+    fig, ax = plot_intensity_phase(field, dx=1, dy=1)
+
+    assert ax.shape == (2,)
+
+    plt.close(fig)
+
+
+def test_plot_intensity_phase_custom_titles(field):
+    fig, ax = plot_intensity_phase(
+        field,
+        title1="My intensity",
+        title2="My phase",
+    )
+
+    assert ax[0].get_title() == "My intensity"
+    assert ax[1].get_title() == "My phase"
+
+    plt.close(fig)
+
+
+def test_plot_intensity_phase_with_physical_coordinates(field):
+    fig, ax = plot_intensity_phase(
+        field,
+        dx=1e-6,
+        dy=2e-6,
+    )
+
+    assert ax[0].get_xlabel() == "X"
+    assert ax[0].get_ylabel() == "Y"
+    assert ax[1].get_xlabel() == "X"
+    assert ax[1].get_ylabel() == "Y"
+
+    plt.close(fig)
+
+
+def test_plot_intensity_phase_with_pixel_coordinates(field):
+    fig, ax = plot_intensity_phase(field)
+
+    assert ax[0].get_xlabel() == "X pixel"
+    assert ax[0].get_ylabel() == "Y pixel"
+    assert ax[1].get_xlabel() == "X pixel"
+    assert ax[1].get_ylabel() == "Y pixel"
+
+    plt.close(fig)
+
+
+def test_plot_intensity_phase_creates_two_colorbars(field):
+    fig, ax = plot_intensity_phase(field)
+
+    # 2 plotting axes + 2 colorbar axes
+    assert len(fig.axes) == 4
+
+    plt.close(fig)
